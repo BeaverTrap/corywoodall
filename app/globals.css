@@ -1,0 +1,54 @@
+/* Import fonts */
+@font-face {
+    font-family: 'Press Start 2P';
+    /* Matches the file: PressStart2P-Regular.ttf */
+    src: url('/fonts/Press_Start_2P/PressStart2P-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Cinzel';
+    /* Matches the file: Cinzel-VariableFont_wght.ttf */
+    src: url('/fonts/Cinzel/Cinzel-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Noto Sans';
+    /* Matches the file: NotoSans-VariableFont_wdth_wght.ttf */
+    src: url('/fonts/Noto_Sans/NotoSans-VariableFont_wdth_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+  }
+  
+  /* Tailwind directives */
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+  
+  /* Force theme-specific fonts with high specificity */
+  /* When cassette theme is active, force DOS-style font */
+  html[data-theme="cassette"] body,
+  html[data-theme="cassette"] body * {
+    font-family: 'Press Start 2P', monospace !important;
+  }
+  
+  /* Force smaller font size when cassette theme is active */
+  html[data-theme="cassette"] body {
+    font-size: 0.875rem; /* ~14px */
+  }
+  
+
+  /* When homebrew theme is active, force D&D-style font */
+  html[data-theme="homebrew"] body,
+  html[data-theme="homebrew"] body * {
+    font-family: 'Cinzel', serif !important;
+  }
+  
+  /* Fallback: ensure the body uses DaisyUI's variable (if set by the theme) */
+  body {
+    font-family: var(--daisyui-font-family-base);
+  }
+  
