@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -8,6 +8,23 @@ import 'yet-another-react-lightbox/styles.css';
 export default function Gallery({ images, onClose }) {
   const [isOpen, setIsOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [preloadedImages, setPreloadedImages] = useState([]);
+
+  // Preload images
+  useEffect(() => {
+    const preloadImage = (src) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+    };
+
+    // Preload all full-size images
+    Promise.all(images.map(image => preloadImage(image.full)))
+      .then(() => setPreloadedImages(images.map(img => img.full)));
+  }, [images]);
 
   // Convert images array to the format expected by yet-another-react-lightbox
   const slides = images.map(image => ({
@@ -35,6 +52,7 @@ export default function Gallery({ images, onClose }) {
               className="object-contain"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority={index < 6}
+              loading={index < 6 ? "eager" : "lazy"}
             />
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               <span className="text-white text-lg font-medium">View Image</span>
@@ -52,6 +70,14 @@ export default function Gallery({ images, onClose }) {
         }}
         index={photoIndex}
         slides={slides}
+        carousel={{
+          preload: 3
+        }}
+        render={{
+          iconPrev: () => <span className="text-white text-2xl">←</span>,
+          iconNext: () => <span className="text-white text-2xl">→</span>,
+          iconClose: () => <span className="text-white text-2xl">×</span>
+        }}
       />
     </div>
   );
