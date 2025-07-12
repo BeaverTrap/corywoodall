@@ -10,7 +10,7 @@ import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/captions.css';
 import { MdBrightness6, MdOpacity } from 'react-icons/md';
 
-// Add this CSS to your global styles or in a style tag
+  // Add this CSS to your global styles or in a style tag
 const styles = `
   .portfolio-item {
     transition: all 0.3s ease-in-out;
@@ -42,6 +42,22 @@ const styles = `
     display: flex !important;
     align-items: center !important;
     gap: 20px !important;
+  }
+
+  /* FAQ Styles */
+  .faq-item h3 {
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 8px;
+  }
+
+  .faq-item h3:hover {
+    border-bottom-color: rgba(0,0,0,0.3);
+  }
+
+  .faq-item p {
+    transition: all 0.3s ease;
+    overflow: hidden;
   }
 `;
 
@@ -93,15 +109,17 @@ export default function Home() {
   const snowfallRef = useRef(null);
   const miscWorksRef = useRef(null);
   const contactRef = useRef(null);
+  const faqRef = useRef(null);
   const [selectedGallery, setSelectedGallery] = useState(null);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [overlayOpacity, setOverlayOpacity] = useState(0.05);
   const [activeSection, setActiveSection] = useState('');
-  const [formStatus, setFormStatus] = useState('');
+
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lightboxOpacity, setLightboxOpacity] = useState(1);
   const [lightboxDarkness, setLightboxDarkness] = useState(1);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   const scrollToSection = (ref) => {
     if (ref.current) {
@@ -190,7 +208,7 @@ export default function Home() {
           const scrollingUp = entry.boundingClientRect.y > 0;
           if (scrollingUp) {
             // Find the previous section that's in view
-            const sections = [aboutRef.current, portfolioRef.current, contactRef.current];
+            const sections = [aboutRef.current, portfolioRef.current, contactRef.current, faqRef.current];
             const currentIndex = sections.findIndex(section => section === entry.target);
             if (currentIndex > 0) {
               const previousSection = sections[currentIndex - 1];
@@ -212,7 +230,7 @@ export default function Home() {
       }
     };
 
-    const sections = [aboutRef.current, portfolioRef.current, contactRef.current];
+    const sections = [aboutRef.current, portfolioRef.current, contactRef.current, faqRef.current];
     sections.forEach(section => {
       if (section) {
         sectionObserver.observe(section);
@@ -262,7 +280,7 @@ export default function Home() {
         alt: 'California Native Study 5'
       }
     ],
-    glass: [
+    Bouquets: [
       {
         thumbnail: '/images/portfolio/glass/thumbs/Cosmos and Fern 2024.jpg',
         full: '/images/portfolio/glass/full/Cosmos and Fern 2024.jpg',
@@ -441,35 +459,7 @@ export default function Home() {
     }
   ];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      subject: formData.get('subject'),
-      message: formData.get('message'),
-    };
 
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        setFormStatus('success');
-        e.target.reset();
-      } else {
-        setFormStatus('error');
-      }
-    } catch (error) {
-      setFormStatus('error');
-    }
-  };
 
   return (
     <>
@@ -540,6 +530,22 @@ export default function Home() {
                   >
                     Contact
                   </button>
+                  <button 
+                    onClick={() => scrollToSection(faqRef)}
+                    className={`text-black transition-all duration-300 ${
+                      activeSection === 'faq' 
+                        ? 'opacity-100 scale-110 font-bold' 
+                        : 'opacity-70 hover:scale-110 hover:opacity-100'
+                    }`}
+                  >
+                    FAQ
+                  </button>
+                  <Link 
+                    href="/articles"
+                    className="text-black transition-all duration-300 opacity-70 hover:scale-110 hover:opacity-100"
+                  >
+                    Articles
+                  </Link>
                 </div>
               </div>
             </div>
@@ -662,70 +668,108 @@ export default function Home() {
 
           {/* Contact section */}
           <section id="contact" ref={contactRef} className="min-h-screen flex items-center justify-center">
+            <div className="container mx-auto px-4 max-w-2xl">
+              <div className="text-center">
+                <div className="backdrop-blur-md bg-white/50 p-12 rounded-lg">
+                  <div className="space-y-8">
+                    <div className="space-y-4">
+                      <h3 className="text-3xl font-bold text-black tracking-wide">Contact</h3>
+                      <p className="text-lg text-black/80 leading-relaxed">
+                        Available for commissions, gallery exhibitions, and educational workshops.
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-center space-x-4">
+                        <span className="text-black/60 text-lg">Email:</span>
+                        <a 
+                          href="mailto:woodallcory@gmail.com" 
+                          className="text-xl text-black hover:text-gray-700 transition-colors duration-300 font-medium"
+                        >
+                          woodallcory@gmail.com
+                        </a>
+                      </div>
+                      
+                      <div className="flex items-center justify-center space-x-4">
+                        <span className="text-black/60 text-lg">Location:</span>
+                        <span className="text-xl text-black font-medium">
+                          Flagstaff, Arizona
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-6 border-t border-black/20">
+                      <p className="text-sm text-black/60">
+                        Please include details about your project or inquiry in your email.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Add spacer for separation */}
+          <div className="h-[25vh]"></div>
+
+          {/* FAQ section */}
+          <section id="faq" ref={faqRef} className="min-h-screen flex items-center justify-center py-20">
             <div className="container mx-auto px-4 max-w-3xl backdrop-blur-md bg-white/50 p-8 rounded-lg">
-              <h2 className="text-5xl font-black text-center mb-12 text-black tracking-[0.1em]">CONTACT</h2>
-              <div className="space-y-6 text-black">
-                <p className="text-lg leading-relaxed tracking-wide text-center mb-8">
-                  For commissions, consignment opportunities, exhibition inquiries, or general questions, please reach out directly.
-                </p>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2">Name</label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        required
-                        className="w-full px-4 py-2 rounded-lg bg-white/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        required
-                        className="w-full px-4 py-2 rounded-lg bg-white/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium mb-2">Subject</label>
-                    <input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      required
-                      className="w-full px-4 py-2 rounded-lg bg-white/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows="6"
-                      required
-                      className="w-full px-4 py-2 rounded-lg bg-white/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-                    ></textarea>
-                  </div>
-                  <div className="text-center">
-                    <button
-                      type="submit"
-                      className="px-8 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-300 font-medium tracking-wide"
-                    >
-                      Send Message
-                    </button>
-                  </div>
-                  {formStatus === 'success' && (
-                    <p className="text-green-600 text-center font-medium">Message sent successfully!</p>
-                  )}
-                  {formStatus === 'error' && (
-                    <p className="text-red-600 text-center font-medium">There was an error sending your message. Please try again.</p>
-                  )}
-                </form>
+              <h2 className="text-5xl font-black text-center mb-12 text-black tracking-[0.1em]">FAQ</h2>
+              <div className="space-y-8 text-black">
+                                 <div className="faq-item">
+                   <h3 className="text-3xl font-bold mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 0 ? null : 0)}>
+                     What is cyanotype art?
+                   </h3>
+                   <div className={`${openFaqIndex === 0 ? 'block' : 'hidden'}`}>
+                     <p className="text-lg leading-relaxed tracking-wide mb-4">
+                       The medium of cyanotype is a photographic one, created with a careful mixture of light sensitive chemicals coated onto a support surface and exposed to ultraviolet light, leaving behind areas of light and dark—shadows, essentially. This shadow-fixing process is the basis of all non-digital photography since its invention in 1839. The major difference between the numerous ways of making photographic prints is the materials involved that makes a surface light sensitive with the ability to capture and preserve impressions of light and shadow. Cyanotype emulsion (a liquid) uses a combination of water and chemicals that are available commercially today and can be applied to a variety of support surfaces, including paper, fabric, and ceramic.
+                     </p>
+                     <Link href="/articles" className="text-sm text-gray-600 hover:text-black transition-colors duration-300">
+                       Read more about cyanotype art in our articles section →
+                     </Link>
+                   </div>
+                 </div>
+                <div className="faq-item">
+                  <h3 className="text-3xl font-bold mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 1 ? null : 1)}>
+                    How does cyanotype work?
+                  </h3>
+                  <p className={`text-lg leading-relaxed tracking-wide ${openFaqIndex === 1 ? 'block' : 'hidden'}`}>
+                    The cyanotype process involves exposing light-sensitive paper to a solution of ferric ammonium citrate (FAC) and potassium ferricyanide (K3Fe(CN)6). When light hits the paper, it creates a latent image. The paper is then immersed in a developer (usually a solution of ferrous ammonium sulfate) to reveal the blue print. Cory's work involves careful exposure to UV light and precise timing of the developer application.
+                  </p>
+                </div>
+                <div className="faq-item">
+                  <h3 className="text-3xl font-bold mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 2 ? null : 2)}>
+                    What materials do you use for cyanotype?
+                  </h3>
+                  <p className={`text-lg leading-relaxed tracking-wide ${openFaqIndex === 2 ? 'block' : 'hidden'}`}>
+                    Cory uses a variety of light-sensitive papers, including cotton rag, watercolor, and specialty papers. She also works with natural materials like leaves, flowers, and plant specimens. The choice of paper and materials is crucial for achieving the desired results, as each has its own sensitivity and characteristics.
+                  </p>
+                </div>
+                <div className="faq-item">
+                  <h3 className="text-3xl font-bold mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 3 ? null : 3)}>
+                    How long does a cyanotype print take to develop?
+                  </h3>
+                  <p className={`text-lg leading-relaxed tracking-wide ${openFaqIndex === 3 ? 'block' : 'hidden'}`}>
+                    The development time can vary greatly depending on the paper, exposure, and developer. A typical cyanotype print takes anywhere from 10 minutes to several hours to develop. Cory's prints often require multiple exposures and careful timing to achieve the desired effect.
+                  </p>
+                </div>
+                <div className="faq-item">
+                  <h3 className="text-3xl font-bold mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 4 ? null : 4)}>
+                    Are cyanotype prints permanent?
+                  </h3>
+                  <p className={`text-lg leading-relaxed tracking-wide ${openFaqIndex === 4 ? 'block' : 'hidden'}`}>
+                    Cyanotype prints are indeed permanent. The blue image created on the paper is chemically bonded and will not fade or wash away. This makes them ideal for long-term preservation and exhibition.
+                  </p>
+                </div>
+                <div className="faq-item">
+                  <h3 className="text-3xl font-bold mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 5 ? null : 5)}>
+                    Can I make my own cyanotype prints?
+                  </h3>
+                  <p className={`text-lg leading-relaxed tracking-wide ${openFaqIndex === 5 ? 'block' : 'hidden'}`}>
+                    Yes, absolutely! Cory offers workshops and tutorials for beginners to learn the basics of cyanotype. The process is relatively simple and can be done with common household items. It's a great way to engage with the medium and create your own unique prints.
+                  </p>
+                </div>
               </div>
             </div>
           </section>
