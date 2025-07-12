@@ -16,6 +16,17 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/articles/page.js"
+    ],
+    "/articles/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/articles/layout.js"
+    ],
+    "/articles/what-is-a-cyanotype/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/articles/what-is-a-cyanotype/page.css",
+      "static/chunks/app/articles/what-is-a-cyanotype/page.js"
     ]
   }
 }

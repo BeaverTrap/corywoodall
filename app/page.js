@@ -18,7 +18,6 @@ const styles = `
 
   .portfolio-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   }
 
   /* Custom Lightbox Styles */
@@ -280,7 +279,7 @@ export default function Home() {
         alt: 'California Native Study 5'
       }
     ],
-    Bouquets: [
+    glass: [
       {
         thumbnail: '/images/portfolio/glass/thumbs/Cosmos and Fern 2024.jpg',
         full: '/images/portfolio/glass/full/Cosmos and Fern 2024.jpg',
@@ -619,7 +618,7 @@ export default function Home() {
                           {section.title}
                         </p>
                         <p className="text-2xl font-bold text-black tracking-wider hidden group-hover:block">
-                          View Collection
+                          View Gallery
                         </p>
                       </div>
                     </div>
@@ -653,7 +652,7 @@ export default function Home() {
                           {section.title}
                         </p>
                         <p className="text-2xl font-bold text-black tracking-wider hidden group-hover:block">
-                          View Collection
+                          View Gallery
                         </p>
                       </div>
                     </div>
@@ -783,10 +782,10 @@ export default function Home() {
             setSelectedGallery(null);
           }}
           index={photoIndex}
-          slides={selectedGallery?.images.map(image => ({
+          slides={(selectedGallery?.images ?? []).map(image => ({
             src: image.full,
             description: `${image.alt}\n2023\n${selectedGallery?.title}`
-          })) || []}
+          }))}
           plugins={[Zoom, Captions]}
           captions={{ 
             showToggle: false, 
