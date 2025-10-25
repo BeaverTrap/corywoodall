@@ -1,9 +1,5 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import ArticleContent from '@/components/ArticleContent';
-import ArticleNavigation from '@/components/ArticleNavigation';
-import SocialShare from '@/components/SocialShare';
-import ReadingTime from '@/components/ReadingTime';
 
 export const metadata = {
   title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
@@ -54,18 +50,9 @@ The State Parks Artist Residency places artists inside Arizona's landscapes with
 
 Subscribe or check back here; this page will serve as the **central hub** for post-residency images, write-ups, and announcements.`;
 
-  // Mock navigation data - in a real app, this would come from a CMS or file system
-  const prev = null; // No previous article
-  const next = null; // No next article yet
-
   // Social share URLs
   const pageUrl = `https://yourdomain.com/articles/${data.slug}`;
   const shareText = encodeURIComponent(data.title || '');
-  const shareLinks = [
-    { href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${shareText}`, label: 'Twitter' },
-    { href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`, label: 'Facebook' },
-    { href: `mailto:?subject=${shareText}&body=${encodeURIComponent(pageUrl)}`, label: 'Email' },
-  ];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -80,16 +67,38 @@ Subscribe or check back here; this page will serve as the **central hub** for po
                 day: 'numeric' 
               })}
             </time>
-            <ReadingTime readingTime={3} />
+            <span>3 min read</span>
           </div>
         </header>
 
-        <ArticleContent content={content} />
+        <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />
 
         <footer className="mt-12 pt-8 border-t">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
-            <SocialShare shareLinks={shareLinks} />
-            <ArticleNavigation prev={prev} next={next} />
+            <div className="flex gap-4">
+              <a 
+                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${shareText}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Share on Twitter
+              </a>
+              <a 
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Share on Facebook
+              </a>
+              <a 
+                href={`mailto:?subject=${shareText}&body=${encodeURIComponent(pageUrl)}`}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Share via Email
+              </a>
+            </div>
           </div>
         </footer>
       </article>
