@@ -60,30 +60,30 @@ export default function ArticlesIndex() {
         <Navigation currentPage="articles" />
         <div className="pt-20 pb-16">
           <div className="container mx-auto px-4 max-w-4xl">
-            <div className="text-center mb-16">
-              <h1 className="text-6xl font-black text-black mb-8 tracking-[0.1em]">ARTICLES</h1>
-              <p className="text-xl text-black/80 tracking-wide max-w-2xl mx-auto">
+            <div className="text-center mb-8 md:mb-16">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-black mb-4 md:mb-8 tracking-[0.1em]">ARTICLES</h1>
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-black/80 tracking-wide max-w-2xl mx-auto px-4">
                 Insights into cyanotype art, historical processes, and contemporary applications
               </p>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               {articles.map(article => (
-                <div key={article.slug} className="backdrop-blur-md bg-white/50 p-8 rounded-lg">
-                  <div className="flex justify-between items-start mb-4">
-                    <Link href={`/articles/${article.slug}`} className="text-3xl font-bold text-black tracking-wide hover:underline">
+                <div key={article.slug} className="backdrop-blur-md bg-white/50 p-4 sm:p-6 md:p-8 rounded-lg">
+                  <div className="mb-4">
+                    <Link href={`/articles/${article.slug}`} className="text-xl sm:text-2xl md:text-3xl font-bold text-black tracking-wide hover:underline block mb-2">
                       {article.title}
                     </Link>
-                    <div className="text-sm text-black/60">
+                    <div className="text-xs sm:text-sm text-black/60 flex flex-wrap items-center gap-2">
                       <span>{article.date}</span>
-                      <span className="mx-2">·</span>
+                      <span>·</span>
                       <span>{article.readingTime} min read</span>
                     </div>
                   </div>
-                  <p className="text-lg text-black/80 leading-relaxed tracking-wide">
+                  <p className="text-sm sm:text-base md:text-lg text-black/80 leading-relaxed tracking-wide mb-4">
                     {article.preview}
                   </p>
-                  <div className="mt-4">
-                    <Link href={`/articles/${article.slug}`} className="text-black font-medium hover:underline">Read more →</Link>
+                  <div>
+                    <Link href={`/articles/${article.slug}`} className="text-sm sm:text-base text-black font-medium hover:underline">Read more →</Link>
                   </div>
                 </div>
               ))}
