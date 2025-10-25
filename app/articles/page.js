@@ -12,23 +12,37 @@ export default function ArticlesIndex() {
     (entry) => entry.isDirectory() && entry.name !== '[slug]'
   );
 
-  // For each directory, read page.mdx and parse frontmatter
+  // For each directory, read page.mdx or page.js and parse frontmatter
   const articles = articleDirs.map((dir) => {
     const mdxPath = path.join(articlesDirectory, dir.name, 'page.mdx');
-    if (!fs.existsSync(mdxPath)) return null;
-    const fileContents = fs.readFileSync(mdxPath, 'utf8');
-    const { data, content } = matter(fileContents);
-    // Calculate reading time (average 200 words per minute)
-    const words = content ? content.split(/\s+/).length : 0;
-    const readingTime = Math.max(1, Math.round(words / 200));
-    // Get first 40 words for preview
-    const preview = content ? content.split(/\s+/).slice(0, 40).join(' ') + '…' : '';
-    return {
-      slug: dir.name,
-      ...data,
-      readingTime,
-      preview,
-    };
+    const jsPath = path.join(articlesDirectory, dir.name, 'page.js');
+    
+    if (fs.existsSync(mdxPath)) {
+      // Handle MDX files
+      const fileContents = fs.readFileSync(mdxPath, 'utf8');
+      const { data, content } = matter(fileContents);
+      const words = content ? content.split(/\s+/).length : 0;
+      const readingTime = Math.max(1, Math.round(words / 200));
+      const preview = content ? content.split(/\s+/).slice(0, 40).join(' ') + '…' : '';
+      return {
+        slug: dir.name,
+        ...data,
+        readingTime,
+        preview,
+      };
+    } else if (fs.existsSync(jsPath)) {
+      // Handle JS files - return basic info for the residency article
+      if (dir.name === 'arizona-state-parks-artist-residency-2025') {
+        return {
+          slug: dir.name,
+          title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
+          date: '2025-10-29',
+          readingTime: 3,
+          preview: 'I\'m honored to be selected for the Arizona State Parks Artist Residency Program, hosted at Patagonia Lake State Park and presented in collaboration with Arizona State Parks and Trails and the Arizona Commission on the Arts, with support from the Arizona Community Foundation. My work during the residency will continue my exploration of historic cyanotype printmaking—hand-coated papers, light-sensitive chemistry, and ethically sourced botanical specimens arranged to study form and luminous contrast. I\'m interested in how light maps the structure of plants—quiet, ethereal impressions that sit between drawing and photography. While I may post sparingly during the residency, I\'ll publish a fuller update after Nov 16 with: A gallery of new cyanotypes created on site, Notes on process, materials, and plant selection, Next steps for this body of work (exhibits, editions, and prints). The State Parks Artist Residency places artists inside Arizona\'s landscapes with on-site housing, workspace, and opportunities for open studios and public engagement at the park. Partners: @azstateparks, @azartscomm, @theazfoundation. Subscribe or check back here; this page will serve as the central hub for post-residency images, write-ups, and announcements. Hero image alt: "Cyanotype print of native plant silhouettes on deep blue paper, inspired by Patagonia Lake State Park."…'
+        };
+      }
+    }
+    return null;
   }).filter(Boolean).sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (

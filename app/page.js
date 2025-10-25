@@ -58,6 +58,11 @@ const styles = `
     transition: all 0.3s ease;
     overflow: hidden;
   }
+
+  /* Lightbox hover behavior */
+  .yarl__slide:hover .yarl__captions_description_container {
+    opacity: 1 !important;
+  }
 `;
 
 // Custom toolbar with sliders
@@ -247,184 +252,146 @@ export default function Home() {
 
   // Your complete portfolio images data
   const portfolioImages = {
-    californiaNatives: [
+    newWorks2025: [
       {
-        thumbnail: '/images/portfolio/california_native/thumbs/California Poppy 2022.jpg',
-        full: '/images/portfolio/california_native/full/California Poppy 2022.jpg',
-        alt: 'California Poppy, 2022'
+        thumbnail: '/images/portfolio/new_works_2025/thumbs/Evening Primrose May 2025.jpg',
+        full: '/images/portfolio/new_works_2025/full/Evening Primrose May 2025.jpg',
+        alt: 'Evening Primrose, May 2025'
       },
       {
-        thumbnail: '/images/portfolio/california_native/thumbs/CA Native 1.jpg',
-        full: '/images/portfolio/california_native/full/CA Native 1.jpg',
-        alt: 'California Native Study 1'
-      },
-      {
-        thumbnail: '/images/portfolio/california_native/thumbs/CA Native 2.jpg',
-        full: '/images/portfolio/california_native/full/CA Native 2.jpg',
-        alt: 'California Native Study 2'
-      },
-      {
-        thumbnail: '/images/portfolio/california_native/thumbs/CA NAtive 3.jpg',
-        full: '/images/portfolio/california_native/full/CA NAtive 3.jpg',
-        alt: 'California Native Study 3'
-      },
-      {
-        thumbnail: '/images/portfolio/california_native/thumbs/CA NAtive 4.jpg',
-        full: '/images/portfolio/california_native/full/CA NAtive 4.jpg',
-        alt: 'California Native Study 4'
-      },
-      {
-        thumbnail: '/images/portfolio/california_native/thumbs/Ca Native 5.jpg',
-        full: '/images/portfolio/california_native/full/Ca Native 5.jpg',
-        alt: 'California Native Study 5'
+        thumbnail: '/images/portfolio/new_works_2025/thumbs/Lily of the Valley 2025.jpg',
+        full: '/images/portfolio/new_works_2025/full/Lily of the Valley 2025.jpg',
+        alt: 'Lily of the Valley, 2025'
       }
     ],
-    glass: [
+    arrangements: [
       {
-        thumbnail: '/images/portfolio/glass/thumbs/Cosmos and Fern 2024.jpg',
-        full: '/images/portfolio/glass/full/Cosmos and Fern 2024.jpg',
-        alt: 'Cosmos and Fern, 2024'
+        thumbnail: '/images/portfolio/Arrangements/Cosmos and Dill 2024.jpg',
+        full: '/images/portfolio/Arrangements/Cosmos and Dill 2024.jpg',
+        alt: 'Cosmos and Dill, 2024'
       },
       {
-        thumbnail: '/images/portfolio/glass/thumbs/Cosmos in Jar May 2023.jpg',
-        full: '/images/portfolio/glass/full/Cosmos in Jar May 2023.jpg',
-        alt: 'Cosmos in Jar, May 2023'
+        thumbnail: '/images/portfolio/Arrangements/Viola May 2023 editA.jpg',
+        full: '/images/portfolio/Arrangements/Viola May 2023 editA.jpg',
+        alt: 'Viola (vase), 2023'
       },
       {
-        thumbnail: '/images/portfolio/glass/thumbs/FLower in jar MAy 2023 perf.jpg',
-        full: '/images/portfolio/glass/full/FLower in jar MAy 2023 perf.jpg',
-        alt: 'Flower in Jar, May 2023'
+        thumbnail: '/images/portfolio/Arrangements/Phantom flower May 2023 enhance.jpg',
+        full: '/images/portfolio/Arrangements/Phantom flower May 2023 enhance.jpg',
+        alt: 'Phantom Flower, 2023'
       },
       {
-        thumbnail: '/images/portfolio/glass/thumbs/Flower in jar moms yeard May 2023 editA.jpg',
-        full: '/images/portfolio/glass/full/Flower in jar moms yeard May 2023 editA.jpg',
-        alt: 'Flower in Jar from Mom\'s Garden, May 2023'
+        thumbnail: '/images/portfolio/Arrangements/wildflowers in jar edit crop.jpg',
+        full: '/images/portfolio/Arrangements/wildflowers in jar edit crop.jpg',
+        alt: 'Wildflowers (vase), 2025'
       },
       {
-        thumbnail: '/images/portfolio/glass/thumbs/Pea flower jar 2 May 2023.jpg',
-        full: '/images/portfolio/glass/full/Pea flower jar 2 May 2023.jpg',
-        alt: 'Pea Flower in Jar, May 2023'
-      },
-      {
-        thumbnail: '/images/portfolio/glass/thumbs/Phantom flower May 2023 enhance.jpg',
-        full: '/images/portfolio/glass/full/Phantom flower May 2023 enhance.jpg',
-        alt: 'Phantom Flower, May 2023'
-      },
-      {
-        thumbnail: '/images/portfolio/glass/thumbs/wildflowers in jar edit crop.jpg',
-        full: '/images/portfolio/glass/full/wildflowers in jar edit crop.jpg',
-        alt: 'Wildflowers in Jar'
-      },
-      {
-        thumbnail: '/images/portfolio/glass/thumbs/Paperwhites in jar 4-22-2023.jpg',
-        full: '/images/portfolio/glass/full/Paperwhites in jar 4-22-2023.jpg',
-        alt: 'Paperwhites in Jar, April 2023'
-      },
-      {
-        thumbnail: '/images/portfolio/glass/thumbs/Wildflower in jar 4-22-23.jpg',
-        full: '/images/portfolio/glass/full/Wildflower in jar 4-22-23.jpg',
-        alt: 'Wildflower in Jar, April 2023'
+        thumbnail: '/images/portfolio/Arrangements/Tiger Lillies in vase with foliagecw.jpg',
+        full: '/images/portfolio/Arrangements/Tiger Lillies in vase with foliagecw.jpg',
+        alt: 'Tiger Lilies (vase), 2025'
       }
     ],
     herbaria: [
       {
-        thumbnail: '/images/portfolio/herbaria/thumbs/Blackberry May 2023.jpg',
-        full: '/images/portfolio/herbaria/full/Blackberry May 2023.jpg',
-        alt: 'Blackberry Study, May 2023'
+        thumbnail: '/images/portfolio/Herbaria/Sapling 2022 blue CLEAN WHITE.jpg',
+        full: '/images/portfolio/Herbaria/Sapling 2022 blue CLEAN WHITE.jpg',
+        alt: 'Sapling, 2022'
       },
       {
-        thumbnail: '/images/portfolio/herbaria/thumbs/Blue flower aguanga May 2023.jpg',
-        full: '/images/portfolio/herbaria/full/Blue flower aguanga May 2023.jpg',
-        alt: 'Blue Flower from Aguanga, May 2023'
+        thumbnail: '/images/portfolio/Herbaria/California Poppy 2022.jpg',
+        full: '/images/portfolio/Herbaria/California Poppy 2022.jpg',
+        alt: 'California Poppy, 2022'
       },
       {
-        thumbnail: '/images/portfolio/herbaria/thumbs/Long flower May 2023 edit.jpg',
-        full: '/images/portfolio/herbaria/full/Long flower May 2023 edit.jpg',
-        alt: 'Long Flower Study, May 2023'
+        thumbnail: '/images/portfolio/Herbaria/Blackberry May 2023.jpg',
+        full: '/images/portfolio/Herbaria/Blackberry May 2023.jpg',
+        alt: 'Blackberry Blossoms, May 2023'
       },
       {
-        thumbnail: '/images/portfolio/herbaria/thumbs/Many baby sprouts May 2023.jpg',
-        full: '/images/portfolio/herbaria/full/Many baby sprouts May 2023.jpg',
-        alt: 'Many Baby Sprouts, May 2023'
+        thumbnail: '/images/portfolio/Herbaria/Honeysuckle Fucshia.jpg',
+        full: '/images/portfolio/Herbaria/Honeysuckle Fucshia.jpg',
+        alt: 'Honeysuckle Fuchsia, May 2023'
       },
       {
-        thumbnail: '/images/portfolio/herbaria/thumbs/Sprouts weed May 2023.jpg',
-        full: '/images/portfolio/herbaria/full/Sprouts weed May 2023.jpg',
-        alt: 'Sprout Study, May 2023'
+        thumbnail: '/images/portfolio/Herbaria/Paperwhites April 25cw.jpg',
+        full: '/images/portfolio/Herbaria/Paperwhites April 25cw.jpg',
+        alt: 'Paperwhites, April 2025'
       },
       {
-        thumbnail: '/images/portfolio/herbaria/thumbs/Three weed sprouts May 2023.jpg',
-        full: '/images/portfolio/herbaria/full/Three weed sprouts May 2023.jpg',
-        alt: 'Three Weed Sprouts, May 2023'
-      },
-      {
-        thumbnail: '/images/portfolio/herbaria/thumbs/Weed sprout 2022 blue CLEAN WHITE.jpg',
-        full: '/images/portfolio/herbaria/full/Weed sprout 2022 blue CLEAN WHITE.jpg',
-        alt: 'Weed Sprout Study, 2022'
+        thumbnail: '/images/portfolio/Herbaria/Evening Primrose group.jpg',
+        full: '/images/portfolio/Herbaria/Evening Primrose group.jpg',
+        alt: 'Three Weed Sprouts, 2023'
       }
     ],
     snowfall: [
       {
-        thumbnail: '/images/portfolio/snowfall/thumbs/SNOW APRIL 4 2025 FLAGSTAFF CW.jpg',
-        full: '/images/portfolio/snowfall/full/SNOW APRIL 4 2025 FLAGSTAFF CW.jpg',
-        alt: 'Snowfall, April 4 2025, Flagstaff'
+        thumbnail: '/images/portfolio/Snowfall/Snow quad.jpg',
+        full: '/images/portfolio/Snowfall/Snow quad.jpg',
+        alt: 'Snowfall (quadriptych), April 4 2025, Flagstaff AZ'
       },
       {
-        thumbnail: '/images/portfolio/snowfall/thumbs/Snow quad.jpg',
-        full: '/images/portfolio/snowfall/full/Snow quad.jpg',
-        alt: 'Snow Quadriptych'
+        thumbnail: '/images/portfolio/Snowfall/Snowfall 1 of 4.jpg',
+        full: '/images/portfolio/Snowfall/Snowfall 1 of 4.jpg',
+        alt: 'Snowfall (1 of 4), April 4 2025, Flagstaff AZ'
       },
       {
-        thumbnail: '/images/portfolio/snowfall/thumbs/Snowfall January, 2025 Flagstaff.jpg',
-        full: '/images/portfolio/snowfall/full/Snowfall January, 2025 Flagstaff.jpg',
-        alt: 'Snowfall, January 2025, Flagstaff'
+        thumbnail: '/images/portfolio/Snowfall/Snowfall 2 of 4.jpg',
+        full: '/images/portfolio/Snowfall/Snowfall 2 of 4.jpg',
+        alt: 'Snowfall (2 of 4), April 4 2025, Flagstaff AZ'
       },
       {
-        thumbnail: '/images/portfolio/snowfall/thumbs/Snowfall, April 3 2025, Flagstaffcw.jpg',
-        full: '/images/portfolio/snowfall/full/Snowfall, April 3 2025, Flagstaffcw.jpg',
-        alt: 'Snowfall, April 3 2025, Flagstaff'
+        thumbnail: '/images/portfolio/Snowfall/Snowfall 3 of 4 Flagstaff CW2.jpg',
+        full: '/images/portfolio/Snowfall/Snowfall 3 of 4 Flagstaff CW2.jpg',
+        alt: 'Snowfall (3 of 4), April 4 2025, Flagstaff AZ'
       },
       {
-        thumbnail: '/images/portfolio/snowfall/thumbs/Snowfall, April 4, 2025 Flagstaff CW.jpg',
-        full: '/images/portfolio/snowfall/full/Snowfall, April 4, 2025 Flagstaff CW.jpg',
-        alt: 'Snowfall, April 4 2025, Flagstaff'
+        thumbnail: '/images/portfolio/Snowfall/Snowfall 4 of 4.jpg',
+        full: '/images/portfolio/Snowfall/Snowfall 4 of 4.jpg',
+        alt: 'Snowfall (4 of 4), April 4 2025, Flagstaff AZ'
       }
     ],
-    miscWorks: [
+    californiaNatives: [
       {
-        thumbnail: '/images/portfolio/misc_works/thumbs/Lilly of theh Valley Bouquet, Feb 2025.jpg',
-        full: '/images/portfolio/misc_works/full/Lilly of theh Valley Bouquet, Feb 2025.jpg',
-        alt: 'Lily of the Valley Bouquet, February 2025'
+        thumbnail: '/images/portfolio/CA Native/CA Native 1.jpg',
+        full: '/images/portfolio/CA Native/CA Native 1.jpg',
+        alt: 'California Native Study 1, 2023'
       },
       {
-        thumbnail: '/images/portfolio/misc_works/thumbs/Cosmos and Dill varieties May 2023 fb.jpg',
-        full: '/images/portfolio/misc_works/full/Cosmos and Dill varieties May 2023 fb.jpg',
-        alt: 'Cosmos and Dill Varieties, May 2023'
+        thumbnail: '/images/portfolio/CA Native/CA Native 2.jpg',
+        full: '/images/portfolio/CA Native/CA Native 2.jpg',
+        alt: 'California Native Study 2, 2023'
       },
       {
-        thumbnail: '/images/portfolio/misc_works/thumbs/Paperwhites April 25cw.jpg',
-        full: '/images/portfolio/misc_works/full/Paperwhites April 25cw.jpg',
-        alt: 'Paperwhites, April 25'
+        thumbnail: '/images/portfolio/CA Native/CA NAtive 3.jpg',
+        full: '/images/portfolio/CA Native/CA NAtive 3.jpg',
+        alt: 'California Native Study 3, 2023'
       },
       {
-        thumbnail: '/images/portfolio/misc_works/thumbs/foliage.jpg',
-        full: '/images/portfolio/misc_works/full/foliage.jpg',
-        alt: 'Foliage Study'
+        thumbnail: '/images/portfolio/CA Native/CA NAtive 4.jpg',
+        full: '/images/portfolio/CA Native/CA NAtive 4.jpg',
+        alt: 'California Native Study 4, 2023'
       },
       {
-        thumbnail: '/images/portfolio/misc_works/thumbs/Sweet Potato sprouting - 2022.jpg',
-        full: '/images/portfolio/misc_works/full/Sweet Potato sprouting - 2022.jpg',
-        alt: 'Sweet Potato Sprouting, 2022'
+        thumbnail: '/images/portfolio/CA Native/Ca Native 5.jpg',
+        full: '/images/portfolio/CA Native/Ca Native 5.jpg',
+        alt: 'California Native Study 5, 2023'
+      }
+    ],
+    flagstaffYard: [
+      {
+        thumbnail: '/images/portfolio/flagstaff_yard/thumbs/Backyard Arrangement Flagstaff 2025.jpg',
+        full: '/images/portfolio/flagstaff_yard/full/Backyard Arrangement Flagstaff 2025.jpg',
+        alt: 'Backyard Arrangement, Flagstaff, AZ, 2025'
       },
       {
-        thumbnail: '/images/portfolio/misc_works/thumbs/Seaweed and flower April 2023.jpg',
-        full: '/images/portfolio/misc_works/full/Seaweed and flower April 2023.jpg',
-        alt: 'Seaweed and Flower, April 2023'
+        thumbnail: '/images/portfolio/Herbaria/Evening Primrose group.jpg',
+        full: '/images/portfolio/Herbaria/Evening Primrose group.jpg',
+        alt: 'Evening Primrose (group), 2025'
       },
       {
-        thumbnail: '/images/portfolio/misc_works/thumbs/Lilly and leaves.jpg',
-        full: '/images/portfolio/misc_works/full/Lilly and leaves.jpg',
-        alt: 'Lily and Leaves'
+        thumbnail: '/images/portfolio/Herbaria/Field BINDWEED 2024 FLAGSTAFF CROP2.jpg',
+        full: '/images/portfolio/Herbaria/Field BINDWEED 2024 FLAGSTAFF CROP2.jpg',
+        alt: 'Field Bindweed, 2024'
       }
     ]
   };
@@ -432,29 +399,40 @@ export default function Home() {
   // Define your portfolio sections
   const portfolioSections = [
     {
-      title: "California Natives",
-      coverImage: "/images/portfolio/california_native/california_native-cover.jpg",
-      images: portfolioImages.californiaNatives
+      title: "New Works",
+      coverImage: "/images/portfolio/new_works_2025/full/Evening Primrose May 2025.jpg",
+      images: portfolioImages.newWorks2025,
+      description: "A selection of recent pieces shared without a set objective—individual explorations that may evolve into future series or remain independent.\n\nEvening Primrose, May 2025\nLily of the Valley, 2025"
     },
     {
-      title: "Glass",
-      coverImage: "/images/portfolio/glass/glass-cover.jpg",
-      images: portfolioImages.glass
+      title: "Arrangements",
+      coverImage: "/images/portfolio/Arrangements/Cosmos and Dill 2024.jpg",
+      images: portfolioImages.arrangements,
+      description: "Reimagining the genre of still life with glass vases and a variety of botanic specimens.\n\nCosmos and Dill, 2024\nViola (vase), 2023\nPhantom Flower, 2023\nWildflowers (vase), 2025\nTiger Lilies (vase), 2025"
     },
     {
       title: "Herbaria",
-      coverImage: "/images/portfolio/herbaria/herbaria-cover.jpg",
-      images: portfolioImages.herbaria
+      coverImage: "/images/portfolio/Herbaria/California Poppy 2022.jpg",
+      images: portfolioImages.herbaria,
+      description: "Singular studies of a variety of botanical specimens in the traditional style of the herbarium, a catalog of plant life utilized by naturalists for centuries.\n\nSapling, 2022\nCalifornia Poppy, 2022\nBlackberry Blossoms, May 2023\nHoneysuckle Fuchsia, May 2023\nPaperwhites, April 2025\nThree Weed Sprouts, 2023"
     },
     {
       title: "Snowfall",
-      coverImage: "/images/portfolio/snowfall/snowfall-cover.jpg",
-      images: portfolioImages.snowfall
+      coverImage: "/images/portfolio/Snowfall/Snowfall 1 of 4.jpg",
+      images: portfolioImages.snowfall,
+      description: "Snowfall (quadriptych), April 4 2025, Flagstaff AZ\n\nSnowfall (1 of 4)\nSnowfall (2 of 4)\nSnowfall (3 of 4)\nSnowfall (4 of 4)"
     },
     {
-      title: "Misc Works",
-      coverImage: "/images/portfolio/misc_works/misc_works-cover.jpg",
-      images: portfolioImages.miscWorks
+      title: "California Natives",
+      coverImage: "/images/portfolio/CA Native/CA Native 1.jpg",
+      images: portfolioImages.californiaNatives,
+      description: "In this series, plants native to California are assembled in imaginary bouquets suggesting an invented and impossible growth between a variety of species. Incorporating specimens from various seasons and regions, these carefully arranged subjects are presented in a single organism.\n\nCalifornia Native Study 1, 2023\nCalifornia Native Study 2, 2023\nCalifornia Native Study 3, 2023\nCalifornia Native Study 4, 2023\nCalifornia Native Study 5, 2023"
+    },
+    {
+      title: "From My Yard, Flagstaff, AZ",
+      coverImage: "/images/portfolio/flagstaff_yard/full/Backyard Arrangement Flagstaff 2025.jpg",
+      images: portfolioImages.flagstaffYard,
+      description: "Botanical studies from the artist's backyard in Flagstaff, Arizona, capturing the natural beauty of local flora.\n\nEvening Primrose (group), 2025\nBackyard Arrangement, Flagstaff, AZ, 2025\nField Bindweed, 2024"
     }
   ];
 
@@ -558,10 +536,10 @@ export default function Home() {
               </h1>
               <div className="backdrop-blur-md bg-white/50 p-8 rounded-lg max-w-2xl mx-auto">
                 <h2 className="text-3xl md:text-4xl text-black font-bold mb-6 tracking-wider">
-                  Cyanotype Resurgence
+                  Contemporary Cyanotypes
                 </h2>
                 <p className="text-xl md:text-2xl text-black font-medium tracking-wide">
-                  A modern revival of the historic cyanotype process, blending traditional UV exposure with contemporary themes and materials.
+                  A revival of the historic cyanotype process, blending traditional UV exposure with contemporary themes and materials.
                 </p>
               </div>
             </div>
@@ -591,72 +569,80 @@ export default function Home() {
           <section id="portfolio" ref={portfolioRef} className="relative min-h-screen pt-16 pb-32">
             <div className="container mx-auto px-4">
               <div className="max-w-6xl mx-auto">
-                {/* Portfolio grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                  {portfolioSections.slice(0, 3).map((section, index) => (
-                    <div 
-                      key={section.title} 
-                      className="portfolio-item w-full max-w-md mx-auto relative group"
-                    >
+                {/* Portfolio list */}
+                <div className="space-y-16">
+                  {portfolioSections.map((section, index) => {
+                    const isEven = index % 2 === 0;
+                    return (
                       <div 
-                        className="relative aspect-square cursor-pointer overflow-hidden transform transition-transform duration-300 group-hover:scale-105"
-                        onClick={() => {
-                          setSelectedGallery(section);
-                          setIsLightboxOpen(true);
-                        }}
+                        key={section.title} 
+                        className={`flex flex-col md:flex-row gap-8 items-center ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}
                       >
-                        <Image
-                          src={section.coverImage}
-                          alt={section.title}
-                          fill
-                          className="object-contain relative z-10"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
-                        />
+                        {/* Image */}
+                        <div className="w-full md:w-1/3 flex-shrink-0">
+                          <div 
+                            className="relative aspect-square cursor-pointer overflow-hidden transform transition-transform duration-300 hover:scale-105"
+                            onClick={() => {
+                              setSelectedGallery(section);
+                              setIsLightboxOpen(true);
+                            }}
+                          >
+                            <Image
+                              src={section.coverImage}
+                              alt={section.title}
+                              fill
+                              className="object-contain relative z-10"
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Description */}
+                        <div className="w-full md:w-2/3">
+                          <h3 className="text-3xl font-bold text-black tracking-wider mb-4">
+                            {section.title}
+                          </h3>
+                          <div className="backdrop-blur-md bg-white/80 p-6 rounded-lg border border-white/20 shadow-lg">
+                            <p className="text-lg text-gray-800 leading-relaxed mb-4">
+                              {section.description.split('\n\n')[0]}
+                            </p>
+                            
+                            {/* Individual image links */}
+                            {section.description.split('\n\n').length > 1 && (
+                              <div className="mt-4">
+                                <p className="text-sm text-gray-600 mb-2">Works in this series:</p>
+                                <div className="space-y-1">
+                                  {section.description.split('\n\n')[1].split('\n').map((work, workIndex) => (
+                                    <button
+                                      key={workIndex}
+                                      onClick={() => {
+                                        setSelectedGallery(section);
+                                        setPhotoIndex(workIndex);
+                                        setIsLightboxOpen(true);
+                                      }}
+                                      className="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200 text-left"
+                                    >
+                                      {work}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <button 
+                              onClick={() => {
+                                setSelectedGallery(section);
+                                setIsLightboxOpen(true);
+                              }}
+                              className="mt-4 px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-300"
+                            >
+                              View All Images
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-center mt-4">
-                        <p className="text-2xl font-bold text-black tracking-wider transition-opacity duration-300 group-hover:hidden">
-                          {section.title}
-                        </p>
-                        <p className="text-2xl font-bold text-black tracking-wider hidden group-hover:block">
-                          View Gallery
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Second row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[calc(66.666%-1rem)] mx-auto">
-                  {portfolioSections.slice(3, 5).map((section, index) => (
-                    <div 
-                      key={section.title} 
-                      className="portfolio-item w-full max-w-md mx-auto relative group"
-                    >
-                      <div 
-                        className="relative aspect-square cursor-pointer overflow-hidden transform transition-transform duration-300 group-hover:scale-105"
-                        onClick={() => {
-                          setSelectedGallery(section);
-                          setIsLightboxOpen(true);
-                        }}
-                      >
-                        <Image
-                          src={section.coverImage}
-                          alt={section.title}
-                          fill
-                          className="object-contain relative z-10"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                      </div>
-                      <div className="text-center mt-4">
-                        <p className="text-2xl font-bold text-black tracking-wider transition-opacity duration-300 group-hover:hidden">
-                          {section.title}
-                        </p>
-                        <p className="text-2xl font-bold text-black tracking-wider hidden group-hover:block">
-                          View Gallery
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -784,7 +770,7 @@ export default function Home() {
           index={photoIndex}
           slides={(selectedGallery?.images ?? []).map(image => ({
             src: image.full,
-            description: `${image.alt}\n2023\n${selectedGallery?.title}`
+            description: `${selectedGallery?.title}\n${image.alt}`
           }))}
           plugins={[Zoom, Captions]}
           captions={{ 
@@ -796,19 +782,27 @@ export default function Home() {
               backgroundColor: '#000000'
             },
             captionsDescriptionContainer: {
-              backgroundColor: 'transparent',
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              backdropFilter: 'blur(10px)',
               position: 'absolute',
               bottom: '40px',
               left: '60px',
-              right: 0,
-              padding: '0 40px'
+              right: '60px',
+              padding: '20px 30px',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              opacity: '0',
+              transition: 'opacity 0.3s ease-in-out',
+              pointerEvents: 'none'
             },
             captionsDescription: {
               color: 'white',
-              fontSize: '20px',
-              fontWeight: '400',
+              fontSize: '18px',
+              fontWeight: '500',
               whiteSpace: 'pre-line',
-              lineHeight: '1.5'
+              lineHeight: '1.6',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
             }
           }}
         />
