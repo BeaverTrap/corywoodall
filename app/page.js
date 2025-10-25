@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Navigation from './components/Navigation';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
@@ -492,68 +493,8 @@ export default function Home() {
 
         {/* Content container */}
         <div className="relative z-10">
-          {/* Navbar */}
-          <nav className="fixed top-0 left-0 right-0 bg-white/20 backdrop-blur-md shadow-lg z-50">
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-center h-16">
-                <div className="flex items-center space-x-6">
-                  <button 
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="text-xl font-black hover:scale-105 transition-all duration-300 tracking-[0.2em] text-black"
-                  >
-                    CORY WOODALL
-                  </button>
-                  <span className="font-medium opacity-30 transition-all duration-300 text-black">|</span>
-                  <button 
-                    onClick={() => scrollToSection(aboutRef)}
-                    className={`text-black transition-all duration-300 ${
-                      activeSection === 'about' 
-                        ? 'opacity-100 scale-110 font-bold' 
-                        : 'opacity-70 hover:scale-110 hover:opacity-100'
-                    }`}
-                  >
-                    About
-                  </button>
-                  <button 
-                    onClick={() => scrollToSection(portfolioRef)}
-                    className={`text-black transition-all duration-300 ${
-                      activeSection === 'portfolio' 
-                        ? 'opacity-100 scale-110 font-bold' 
-                        : 'opacity-70 hover:scale-110 hover:opacity-100'
-                    }`}
-                  >
-                    Portfolio
-                  </button>
-                  <button 
-                    onClick={() => scrollToSection(contactRef)}
-                    className={`text-black transition-all duration-300 ${
-                      activeSection === 'contact' 
-                        ? 'opacity-100 scale-110 font-bold' 
-                        : 'opacity-70 hover:scale-110 hover:opacity-100'
-                    }`}
-                  >
-                    Contact
-                  </button>
-                  <button 
-                    onClick={() => scrollToSection(faqRef)}
-                    className={`text-black transition-all duration-300 ${
-                      activeSection === 'faq' 
-                        ? 'opacity-100 scale-110 font-bold' 
-                        : 'opacity-70 hover:scale-110 hover:opacity-100'
-                    }`}
-                  >
-                    FAQ
-                  </button>
-                  <Link 
-                    href="/articles"
-                    className="text-black transition-all duration-300 opacity-70 hover:scale-110 hover:opacity-100"
-                  >
-                    Articles
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </nav>
+          {/* Navigation */}
+          <Navigation currentPage="home" activeSection={activeSection} />
 
           {/* Hero section */}
           <section className="relative min-h-screen w-full flex items-center justify-center">
