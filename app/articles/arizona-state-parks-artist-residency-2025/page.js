@@ -72,7 +72,21 @@ Subscribe or check back here; this page will serve as the **central hub** for po
         </header>
 
         <div className="prose prose-lg max-w-none">
-          <div className="whitespace-pre-line">{content}</div>
+          <div dangerouslySetInnerHTML={{ 
+            __html: content
+              .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+              .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+              .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+              .replace(/^\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+              .replace(/^\* (.*$)/gim, '<li>$1</li>')
+              .replace(/^- (.*$)/gim, '<li>$1</li>')
+              .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+              .replace(/\n\n/g, '</p><p>')
+              .replace(/^(?!<[h|l])/gm, '<p>')
+              .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+              .replace(/<\/ul><ul>/g, '')
+              .replace(/<p><\/p>/g, '')
+          }} />
         </div>
 
         <footer className="mt-12 pt-8 border-t">
