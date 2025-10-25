@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
+import Counter from 'yet-another-react-lightbox/plugins/counter';
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/captions.css';
 import { MdBrightness6, MdOpacity } from 'react-icons/md';
@@ -139,6 +140,38 @@ export default function Home() {
   const [lightboxOpacity, setLightboxOpacity] = useState(1);
   const [lightboxDarkness, setLightboxDarkness] = useState(1);
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const [captionOpacity, setCaptionOpacity] = useState(0.4);
+  const [mouseTimeout, setMouseTimeout] = useState(null);
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
+
+  const handleMouseMove = () => {
+    setCaptionOpacity(1);
+    if (mouseTimeout) {
+      clearTimeout(mouseTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setCaptionOpacity(0.4);
+    }, 2000);
+    setMouseTimeout(timeout);
+  };
+
+  const goToNextGallery = () => {
+    const nextIndex = (currentGalleryIndex + 1) % portfolioSections.length;
+    setCurrentGalleryIndex(nextIndex);
+    setSelectedGallery(portfolioSections[nextIndex]);
+    setPhotoIndex(0);
+    setIsLightboxOpen(false);
+    setTimeout(() => setIsLightboxOpen(true), 10);
+  };
+
+  const goToPreviousGallery = () => {
+    const prevIndex = currentGalleryIndex === 0 ? portfolioSections.length - 1 : currentGalleryIndex - 1;
+    setCurrentGalleryIndex(prevIndex);
+    setSelectedGallery(portfolioSections[prevIndex]);
+    setPhotoIndex(0);
+    setIsLightboxOpen(false);
+    setTimeout(() => setIsLightboxOpen(true), 10);
+  };
 
   const scrollToSection = (ref) => {
     if (ref.current) {
@@ -210,57 +243,36 @@ export default function Home() {
     };
   }, []);
 
-  // First, modify the intersection observer to handle the hero section
+  // Use scroll position to determine active section
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.5,
-      rootMargin: '-80px 0px'
-    };
-
-    const sectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        // When a section enters the viewport
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
-        } else {
-          // When a section leaves the viewport, check if we're scrolling up
-          const scrollingUp = entry.boundingClientRect.y > 0;
-          if (scrollingUp) {
-            // Find the previous section that's in view
-            const sections = [aboutRef.current, portfolioRef.current, contactRef.current, faqRef.current];
-            const currentIndex = sections.findIndex(section => section === entry.target);
-            if (currentIndex > 0) {
-              const previousSection = sections[currentIndex - 1];
-              if (previousSection && previousSection.getBoundingClientRect().top < window.innerHeight) {
-                setActiveSection(previousSection.id);
-              }
-            } else if (currentIndex === 0 && window.scrollY < window.innerHeight / 2) {
-              setActiveSection(''); // Reset to hero section
-            }
-          }
-        }
-      });
-    }, observerOptions);
-
-    // Add check for scroll position to handle hero section
     const handleScroll = () => {
-      if (window.scrollY < window.innerHeight / 2) {
-        setActiveSection(''); // Empty string when in hero section
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      
+      // Get section positions
+      const aboutTop = aboutRef.current?.offsetTop || 0;
+      const portfolioTop = portfolioRef.current?.offsetTop || 0;
+      const contactTop = contactRef.current?.offsetTop || 0;
+      const faqTop = faqRef.current?.offsetTop || 0;
+      
+      // Determine which section is currently active
+      if (scrollY < windowHeight / 2) {
+        setActiveSection(''); // Hero section
+      } else if (scrollY < portfolioTop - 100) {
+        setActiveSection('about');
+      } else if (scrollY < contactTop - 100) {
+        setActiveSection('portfolio');
+      } else if (scrollY < faqTop - 100) {
+        setActiveSection('contact');
+      } else {
+        setActiveSection('faq');
       }
     };
 
-    const sections = [aboutRef.current, portfolioRef.current, contactRef.current, faqRef.current];
-    sections.forEach(section => {
-      if (section) {
-        sectionObserver.observe(section);
-      }
-    });
-
-    // Add scroll listener
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial call
 
     return () => {
-      sectionObserver.disconnect();
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -599,6 +611,7 @@ export default function Home() {
                             className="relative aspect-square cursor-pointer overflow-hidden transform transition-transform duration-300 hover:scale-105"
                             onClick={() => {
                               setSelectedGallery(section);
+                              setCurrentGalleryIndex(index);
                               setIsLightboxOpen(true);
                             }}
                           >
@@ -775,6 +788,7 @@ export default function Home() {
           </section>
         </div>
 
+
         {/* Just the Lightbox */}
         <Lightbox
           open={isLightboxOpen}
@@ -787,38 +801,42 @@ export default function Home() {
             src: image.full,
             description: `${selectedGallery?.title}\n${image.alt}`
           }))}
-          plugins={[Zoom, Captions]}
+          plugins={[Zoom, Captions, Counter]}
           captions={{ 
             showToggle: false, 
             descriptionTextAlign: 'left'
           }}
+          onMouseMove={handleMouseMove}
           styles={{
             container: { 
               backgroundColor: '#000000'
             },
             captionsDescriptionContainer: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
               backdropFilter: 'blur(10px)',
               position: 'absolute',
-              bottom: '40px',
-              left: '60px',
-              right: '60px',
-              padding: '20px 30px',
-              borderRadius: '12px',
+              bottom: '60px',
+              left: '20px',
+              right: 'auto',
+              width: 'auto',
+              maxWidth: '300px',
+              padding: '8px 12px',
+              borderRadius: '6px',
               border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              opacity: '0',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+              opacity: captionOpacity,
               transition: 'opacity 0.3s ease-in-out',
               pointerEvents: 'none',
               zIndex: 1000
             },
             captionsDescription: {
               color: 'white',
-              fontSize: '18px',
+              fontSize: '14px',
               fontWeight: '500',
               whiteSpace: 'pre-line',
-              lineHeight: '1.6',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
+              lineHeight: '1.4',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+              margin: '0'
             }
           }}
         />

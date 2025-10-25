@@ -12,21 +12,15 @@
       "static/css/app/page.css",
       "static/chunks/app/page.js"
     ],
-    "/articles/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/articles/page.js"
-    ],
     "/articles/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/articles/layout.js"
     ],
-    "/articles/what-is-a-cyanotype/page": [
+    "/articles/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/articles/what-is-a-cyanotype/page.css",
-      "static/chunks/app/articles/what-is-a-cyanotype/page.js"
+      "static/chunks/app/articles/page.js"
     ]
   }
 }
