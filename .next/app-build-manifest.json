@@ -21,6 +21,16 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/articles/page.js"
+    ],
+    "/articles/arizona-state-parks-artist-residency-2025/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/articles/arizona-state-parks-artist-residency-2025/page.js"
+    ],
+    "/articles/what-is-a-cyanotype/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/articles/what-is-a-cyanotype/page.js"
     ]
   }
 }
