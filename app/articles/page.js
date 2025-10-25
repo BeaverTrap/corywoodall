@@ -36,7 +36,7 @@ export default function ArticlesIndex() {
         return {
           slug: dir.name,
           title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
-          date: '2025-10-29',
+          date: '2025-10-24',
           readingTime: 3,
           preview: 'I\'m honored to be selected for the Arizona State Parks Artist Residency Program, hosted at Patagonia Lake State Park and presented in collaboration with Arizona State Parks and Trails and the Arizona Commission on the Arts, with support from the Arizona Community Foundation. My work during the residency will continue my exploration of historic cyanotype printmaking—hand-coated papers, light-sensitive chemistry, and ethically sourced botanical specimens arranged to study form and luminous contrast. I\'m interested in how light maps the structure of plants—quiet, ethereal impressions that sit between drawing and photography. While I may post sparingly during the residency, I\'ll publish a fuller update after Nov 16 with: A gallery of new cyanotypes created on site, Notes on process, materials, and plant selection, Next steps for this body of work (exhibits, editions, and prints). The State Parks Artist Residency places artists inside Arizona\'s landscapes with on-site housing, workspace, and opportunities for open studios and public engagement at the park. Partners: @azstateparks, @azartscomm, @theazfoundation. Subscribe or check back here; this page will serve as the central hub for post-residency images, write-ups, and announcements. Hero image alt: "Cyanotype print of native plant silhouettes on deep blue paper, inspired by Patagonia Lake State Park."…'
         };
