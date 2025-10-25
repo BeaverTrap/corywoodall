@@ -83,7 +83,9 @@ The process remains popular due to its simplicity, beautiful results, and connec
           </div>
         </header>
 
-        <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />
+        <div className="prose prose-lg max-w-none">
+          <div className="whitespace-pre-line">{content}</div>
+        </div>
 
         <footer className="mt-12 pt-8 border-t">
           <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
