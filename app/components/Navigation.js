@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function Navigation({ currentPage = 'home', activeSection = '' }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false); // Mobile navigation state
 
   useEffect(() => {
     setIsMounted(true);
