@@ -1,35 +1,28 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-import { serialize } from 'next-mdx-remote/serialize';
-import ArticleClient from './ArticleClient';
+import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+import ArticleContent from '@/components/ArticleContent';
+import ArticleNavigation from '@/components/ArticleNavigation';
+import SocialShare from '@/components/SocialShare';
+import ReadingTime from '@/components/ReadingTime';
 
-export default async function ArizonaStateParksResidency() {
-  const articlesDir = path.join(process.cwd(), 'app/articles');
-  const entries = fs.readdirSync(articlesDir, { withFileTypes: true });
-  const articleDirs = entries.filter(e => e.isDirectory() && e.name !== '[slug]');
-  const articles = articleDirs.map(dir => {
-    const mdxPath = path.join(articlesDir, dir.name, 'page.mdx');
-    const jsPath = path.join(articlesDir, dir.name, 'page.js');
-    
-    if (fs.existsSync(mdxPath)) {
-      const fileContents = fs.readFileSync(mdxPath, 'utf8');
-      const { data, content } = matter(fileContents);
-      const words = content ? content.split(/\s+/).length : 0;
-      const readingTime = Math.max(1, Math.round(words / 200));
-      return { slug: dir.name, ...data, readingTime };
-    } else if (fs.existsSync(jsPath) && dir.name === 'arizona-state-parks-artist-residency-2025') {
-      return { slug: dir.name, title: 'Cory Woodall Selected for Arizona State Parks Artist Residency', date: '2025-10-24', readingTime: 3 };
-    }
-    return null;
-  }).filter(Boolean).sort((a, b) => new Date(a.date) - new Date(b.date));
+export const metadata = {
+  title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
+  description: 'I\'m honored to be selected for the Arizona State Parks Artist Residency Program, hosted at Patagonia Lake State Park.',
+  openGraph: {
+    title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
+    description: 'I\'m honored to be selected for the Arizona State Parks Artist Residency Program, hosted at Patagonia Lake State Park.',
+    type: 'article',
+    publishedTime: '2025-10-24',
+  },
+};
 
-  const slug = 'arizona-state-parks-artist-residency-2025';
-  const idx = articles.findIndex(a => a.slug === slug);
-  const prev = idx > 0 ? articles[idx - 1] : null;
-  const next = idx < articles.length - 1 ? articles[idx + 1] : null;
+export default function ArizonaStateParksResidency() {
+  const data = {
+    title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
+    date: '2025-10-24',
+    slug: 'arizona-state-parks-artist-residency-2025'
+  };
 
-  // Create mock MDX content for the residency article
   const content = `# Artist in Residence: Patagonia Lake State Park (Oct 29–Nov 16, 2025)
 
 I'm honored to be selected for the **Arizona State Parks Artist Residency Program**, hosted at **Patagonia Lake State Park** and presented in collaboration with **Arizona State Parks and Trails** and the **Arizona Commission on the Arts**, with support from the **Arizona Community Foundation**.
@@ -61,16 +54,12 @@ The State Parks Artist Residency places artists inside Arizona's landscapes with
 
 Subscribe or check back here; this page will serve as the **central hub** for post-residency images, write-ups, and announcements.`;
 
-  const data = {
-    title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
-    date: '2025-10-24'
-  };
-
-  const mdxSource = await serialize(content);
-  const images = []; // No images for this article
+  // Mock navigation data - in a real app, this would come from a CMS or file system
+  const prev = null; // No previous article
+  const next = null; // No next article yet
 
   // Social share URLs
-  const pageUrl = `https://yourdomain.com/articles/${slug}`;
+  const pageUrl = `https://yourdomain.com/articles/${data.slug}`;
   const shareText = encodeURIComponent(data.title || '');
   const shareLinks = [
     { href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${shareText}`, label: 'Twitter' },
@@ -79,14 +68,31 @@ Subscribe or check back here; this page will serve as the **central hub** for po
   ];
 
   return (
-    <ArticleClient
-      data={data}
-      mdxSource={mdxSource}
-      readingTime={3}
-      prev={prev}
-      next={next}
-      images={images}
-      shareLinks={shareLinks}
-    />
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <article className="prose prose-lg max-w-none">
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold mb-4">{data.title}</h1>
+          <div className="flex items-center gap-4 text-sm text-gray-600 mb-6">
+            <time dateTime={data.date}>
+              {new Date(data.date).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </time>
+            <ReadingTime readingTime={3} />
+          </div>
+        </header>
+
+        <ArticleContent content={content} />
+
+        <footer className="mt-12 pt-8 border-t">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
+            <SocialShare shareLinks={shareLinks} />
+            <ArticleNavigation prev={prev} next={next} />
+          </div>
+        </footer>
+      </article>
+    </div>
   );
 }
