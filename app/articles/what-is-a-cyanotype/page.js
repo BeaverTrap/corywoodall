@@ -19,9 +19,7 @@ export default function CyanotypePage() {
     slug: 'what-is-a-cyanotype'
   };
 
-  const content = `# What is a Cyanotype?
-
-A **cyanotype** is a photographic printing process that produces a cyan-blue print. The process was invented by Sir John Herschel in 1842 and was one of the first non-silver photographic processes.
+  const content = `A **cyanotype** is a photographic printing process that produces a cyan-blue print. The process was invented by Sir John Herschel in 1842 and was one of the first non-silver photographic processes.
 
 ## How It Works
 
