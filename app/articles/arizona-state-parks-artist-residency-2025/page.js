@@ -80,62 +80,66 @@ export default function ArizonaStateParksResidency() {
         </div>
       </div>
 
-      <article className="prose prose-lg max-w-none mx-auto">
-        <div>
-          <h1 className="text-4xl font-bold text-black mb-6 tracking-wide">Artist in Residence: Patagonia Lake State Park (Oct 29–Nov 16, 2025)</h1>
+          <article className="prose prose-lg max-w-none mx-auto">
+            <div>
+              <h1 className="text-4xl font-bold text-black mb-6 tracking-wide">Artist in Residence: Patagonia Lake State Park (Oct 29–Nov 16, 2025)</h1>
 
-          <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">I'm honored to be selected for the <strong>Arizona State Parks Artist Residency Program</strong>, hosted at <strong>Patagonia Lake State Park</strong> and presented in collaboration with <strong>Arizona State Parks and Trails</strong> and the <strong>Arizona Commission on the Arts</strong>, with support from the <strong>Arizona Community Foundation</strong>.</p>
+              <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">Flagstaff-based artist <strong>Cory Woodall</strong> has been selected for the <strong>Arizona State Parks Artist Residency Program</strong>, hosted at <strong>Patagonia Lake State Park</strong> and presented in collaboration with <strong>Arizona State Parks and Trails</strong> and the <strong>Arizona Commission on the Arts</strong>, with support from the <strong>Arizona Community Foundation</strong>.</p>
 
-          <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">My work during the residency will continue my exploration of historic <strong>cyanotype</strong> printmaking—hand-coated papers, light-sensitive chemistry, and ethically sourced botanical specimens arranged to study form and luminous contrast.</p>
+              <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">During the three-week residency, Woodall will continue her exploration of the historic <strong>cyanotype</strong> process—a form of photographic printmaking that merges hand-coated papers, light-sensitive chemistry, and ethically sourced botanical specimens. Her work takes an imaginative divergence in the tradition of botanical studies, creating images of ethereal luminosity inspired by the forms and light of the natural world.</p>
 
-          <blockquote className="border-l-4 border-black/30 pl-6 italic text-lg text-black/70 leading-relaxed tracking-wide mb-4">"I'm interested in how light maps the structure of plants—quiet, ethereal impressions that sit between drawing and photography."</blockquote>
+              <div className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">
+                <p><strong>Official announcement:</strong> <a href="https://azarts.gov/news/artists-selected-for-state-park-artist-residency-program/" className="text-blue-600 hover:text-blue-800 underline">Artists Selected for State Park Artist Residency Program →</a></p>
+                <p><strong>Instagram announcement:</strong> <a href="https://www.instagram.com/p/DQHp9xDjqa9/?utm_source=ig_web_copy_link" className="text-blue-600 hover:text-blue-800 underline">Arizona State Parks post →</a></p>
+              </div>
 
-          <ul className="list-disc list-inside text-lg text-black/80 leading-relaxed tracking-wide mb-4 space-y-2">
-            <li>Official announcement from the Arizona Commission on the Arts → <a href="https://azarts.gov/news/artists-selected-for-state-park-artist-residency-program/" className="text-blue-600 hover:text-blue-800 underline"><strong>Read the article</strong></a></li>
-            <li>Residency announcement on Arizona State Parks' Instagram → <a href="https://www.instagram.com/p/DQHp9xDjqa9/?utm_source=ig_web_copy_link" className="text-blue-600 hover:text-blue-800 underline"><strong>See the post</strong></a></li>
-          </ul>
+              <hr className="my-8 border-black/20" />
 
-          <h2 className="text-3xl font-bold text-black mb-4 mt-8 tracking-wide">What to Expect</h2>
+              <h2 className="text-3xl font-bold text-black mb-4 mt-8 tracking-wide">What to Expect</h2>
 
-          <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">While I may post sparingly <strong>during</strong> the residency, I'll publish a fuller update <strong>after</strong> Nov 16 with:</p>
+              <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">While updates during the residency may be limited, new works and reflections from the experience will be shared after November 16.</p>
 
-          <ul className="list-disc list-inside text-lg text-black/80 leading-relaxed tracking-wide mb-4 space-y-2">
-            <li>A gallery of new cyanotypes created on site</li>
-            <li>Notes on process, materials, and plant selection</li>
-            <li>Next steps for this body of work (exhibits, editions, and prints)</li>
-          </ul>
+              <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">Planned post-residency updates include:</p>
 
-          <h2 className="text-3xl font-bold text-black mb-4 mt-8 tracking-wide">Program Notes</h2>
+              <ul className="list-disc list-inside text-lg text-black/80 leading-relaxed tracking-wide mb-4 space-y-2">
+                <li>A gallery of cyanotypes created on site</li>
+                <li>Notes on process, materials, and plant selection</li>
+                <li>Insights into what's next for this evolving body of work</li>
+              </ul>
 
-          <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">The State Parks Artist Residency places artists inside Arizona's landscapes with on-site housing, workspace, and opportunities for open studios and public engagement at the park.</p>
+              <hr className="my-8 border-black/20" />
 
-          <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4"><strong>Partners:</strong> @azstateparks, @azartscomm, @theazfoundation</p>
+              <h2 className="text-3xl font-bold text-black mb-4 mt-8 tracking-wide">About the Program</h2>
 
-          <hr className="my-8 border-black/20" />
+              <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">The State Parks Artist Residency places artists within Arizona's inspiring natural landscapes, offering on-site housing, workspace, and opportunities for open studios and public engagement at the park.</p>
 
-          <h2 className="text-3xl font-bold text-black mb-4 mt-8 tracking-wide">Follow-up & Updates</h2>
+              <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4"><strong>Program Partners:</strong> @azstateparks, @azartscomm, @theazfoundation</p>
 
-          <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">Subscribe or check back here; this page will serve as the <strong>central hub</strong> for post-residency images, write-ups, and announcements.</p>
-        </div>
-      </article>
+              <hr className="my-8 border-black/20" />
+
+              <h2 className="text-3xl font-bold text-black mb-4 mt-8 tracking-wide">Follow-up & Updates</h2>
+
+              <p className="text-lg text-black/80 leading-relaxed tracking-wide mb-4">Post-residency updates will be shared through dedicated <strong>journal entries</strong> in the articles section and accompanying <strong>galleries</strong> in the portfolio section, documenting the Patagonia Lake cyanotype series and residency experience.</p>
+            </div>
+          </article>
 
       {/* Article Navigation */}
       <div className="mt-12 pt-8 border-t border-gray-200">
         <div className="flex justify-between items-center">
           <div className="flex-1">
-            <div className="text-sm text-gray-500">No previous article</div>
-          </div>
-          <div className="flex-1 text-right">
             <a 
               href="/articles/what-is-a-cyanotype" 
-              className="group flex items-center justify-end text-gray-600 hover:text-black transition-colors"
+              className="group flex items-center text-gray-600 hover:text-black transition-colors"
             >
-              <div className="text-gray-400 group-hover:text-gray-600">→</div>
-              <div className="ml-4">
-                <div className="text-sm text-gray-500 group-hover:text-gray-700">Next Article</div>
+              <div className="mr-4">
+                <div className="text-sm text-gray-500 group-hover:text-gray-700">Previous Article</div>
                 <div className="font-medium group-hover:underline">What is a Cyanotype?</div>
               </div>
+              <div className="text-gray-400 group-hover:text-gray-600">←</div>
             </a>
+          </div>
+          <div className="flex-1 text-right">
+            <div className="text-sm text-gray-500">No next article yet</div>
           </div>
         </div>
       </div>

@@ -1,4 +1,6 @@
 {
+  "/page": "app/page.js",
+  "/articles/page": "app/articles/page.js",
   "/articles/arizona-state-parks-artist-residency-2025/page": "app/articles/arizona-state-parks-artist-residency-2025/page.js",
   "/articles/what-is-a-cyanotype/page": "app/articles/what-is-a-cyanotype/page.js"
 }
