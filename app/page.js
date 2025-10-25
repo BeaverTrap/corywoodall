@@ -63,6 +63,21 @@ const styles = `
   .yarl__slide:hover .yarl__captions_description_container {
     opacity: 1 !important;
   }
+  
+  /* Ensure captions are visible on hover */
+  .yarl__slide:hover .yarl__captions_description_container {
+    opacity: 1 !important;
+    transition: opacity 0.3s ease-in-out !important;
+  }
+  
+  /* Additional hover rules for lightbox captions */
+  .yarl__container:hover .yarl__captions_description_container {
+    opacity: 1 !important;
+  }
+  
+  .yarl__slide:hover .yarl__captions_description_container {
+    opacity: 1 !important;
+  }
 `;
 
 // Custom toolbar with sliders
@@ -794,7 +809,8 @@ export default function Home() {
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
               opacity: '0',
               transition: 'opacity 0.3s ease-in-out',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              zIndex: 1000
             },
             captionsDescription: {
               color: 'white',
