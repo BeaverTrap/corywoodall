@@ -7,7 +7,7 @@ export default function ArticlesLayout({ children }) {
       {/* Background image with overlay */}
       <div className="fixed inset-0 z-0 w-full h-full">
         <Image
-          src="/images/background.jpg"
+          src="/images/background_new.jpg"
           alt="Background"
           fill
           priority

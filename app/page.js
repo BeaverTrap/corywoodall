@@ -475,7 +475,7 @@ export default function Home() {
           <div className="parallax-bg absolute inset-0 w-full h-[200vh]">
             <div className="relative w-full h-full">
               <Image
-                src="/images/background.jpg"
+                src="/images/background_new.jpg"
                 alt="Background"
                 fill
                 className="object-cover"
