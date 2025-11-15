@@ -139,7 +139,16 @@ export default function ArizonaStateParksResidency() {
             </a>
           </div>
           <div className="flex-1 text-right">
-            <div className="text-sm text-gray-500">No next article yet</div>
+            <a 
+              href="/articles/patagonia-lake-residency" 
+              className="group flex items-center justify-end text-gray-600 hover:text-black transition-colors"
+            >
+              <div className="text-gray-400 group-hover:text-gray-600">→</div>
+              <div className="ml-4">
+                <div className="text-sm text-gray-500 group-hover:text-gray-700">Next Article</div>
+                <div className="font-medium group-hover:underline">Patagonia Lake Residency</div>
+              </div>
+            </a>
           </div>
         </div>
       </div>

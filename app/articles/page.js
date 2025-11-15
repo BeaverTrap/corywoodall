@@ -49,6 +49,14 @@ export default function ArticlesIndex() {
           readingTime: 4,
           preview: 'Flagstaff-based artist Cory Woodall has been selected for the Arizona State Parks Artist Residency Program, hosted at Patagonia Lake State Park and presented in collaboration with Arizona State Parks and Trails and the Arizona Commission on the Arts. During the three-week residency, Cory will continue her exploration of the historic cyanotype process.…'
         };
+      } else if (dir.name === 'patagonia-lake-residency') {
+        return {
+          slug: dir.name,
+          title: 'Artist in Residence: Patagonia Lake State Park',
+          date: '2025-11-14',
+          readingTime: 5,
+          preview: 'Cory Woodall is currently spending three weeks at Patagonia Lake State Park as part of the Artist-in-Residence program supported by Arizona State Parks & Trails and the Arizona Commission on the Arts. The residency gives her uninterrupted time to continue her ongoing cyanotype research, working directly with plant material found in one of Arizona\'s most biologically mixed environments.…'
+        };
       }
     }
     return null;
