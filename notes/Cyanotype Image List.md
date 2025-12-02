@@ -1,4 +1,34 @@
 
+**Patagonia Lake State Park**
+
+Spiny Poppy and Hemlock 
+2025
+
+Birdfoot Morning Glory
+2025
+
+Wild Cucumber
+2025
+
+Hemlock
+2025
+
+Mesquite Saplings
+2025
+
+Morning Glory and Weed
+2025
+
+Orange Fantails
+2025
+
+Trailing Four-o-Clock
+2025
+
+Wildflowers, Patagonia Lake, Fall 2025
+
+
+
 **New Works (2025)**
 
 Evening Primrose

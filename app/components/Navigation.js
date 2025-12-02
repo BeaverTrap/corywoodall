@@ -1,18 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function Navigation({ currentPage = 'home', activeSection = '' }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false); // Mobile navigation state
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setIsMobileMenuOpen(prev => !prev);
   };
 
   const scrollToSection = (sectionId) => {
@@ -24,33 +19,6 @@ export default function Navigation({ currentPage = 'home', activeSection = '' })
     }
     setIsMobileMenuOpen(false);
   };
-
-  if (!isMounted) {
-    return (
-      <nav className="fixed top-0 left-0 right-0 bg-white/20 backdrop-blur-md shadow-lg z-50">
-        <div className="container mx-auto px-4">
-          <div className="hidden md:flex items-center justify-center h-16">
-            <div className="flex items-center space-x-6">
-              <div className="text-xl font-black tracking-[0.2em] text-black">
-                CORY WOODALL
-              </div>
-              <span className="font-medium opacity-30 transition-all duration-300 text-black">|</span>
-              <div className="text-black transition-all duration-300 opacity-70">About</div>
-              <div className="text-black transition-all duration-300 opacity-70">Portfolio</div>
-              <div className="text-black transition-all duration-300 opacity-70">Contact</div>
-              <div className="text-black transition-all duration-300 opacity-70">FAQ</div>
-              <span className="font-medium opacity-30 transition-all duration-300 text-black">|</span>
-              <div className="text-black transition-all duration-300 opacity-70">Articles</div>
-            </div>
-          </div>
-          <div className="md:hidden flex items-center justify-between h-16">
-            <div className="text-lg font-black tracking-[0.2em] text-black">CORY WOODALL</div>
-            <div className="w-6 h-6"></div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white/20 backdrop-blur-md shadow-lg z-50">

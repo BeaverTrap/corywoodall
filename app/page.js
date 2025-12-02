@@ -421,11 +421,64 @@ export default function Home() {
         full: '/images/portfolio/Herbaria/Field BINDWEED 2024 FLAGSTAFF CROP2.jpg',
         alt: 'Field Bindweed, 2024'
       }
+    ],
+    patagoniaLake: [
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Spiny Poppy and Hemlock 001.jpg',
+        full: '/images/portfolio/Patagonia Lake/Spiny Poppy and Hemlock 001.jpg',
+        alt: 'Spiny Poppy and Hemlock, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Birdfoot Morning Glory 02.jpg',
+        full: '/images/portfolio/Patagonia Lake/Birdfoot Morning Glory 02.jpg',
+        alt: 'Birdfoot Morning Glory, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Cucumber.jpg',
+        full: '/images/portfolio/Patagonia Lake/Cucumber.jpg',
+        alt: 'Wild Cucumber, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Hemlock 02.jpg',
+        full: '/images/portfolio/Patagonia Lake/Hemlock 02.jpg',
+        alt: 'Hemlock, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Mesquite saplings.jpg',
+        full: '/images/portfolio/Patagonia Lake/Mesquite saplings.jpg',
+        alt: 'Mesquite Saplings, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Morning Glory and Weed 01.jpg',
+        full: '/images/portfolio/Patagonia Lake/Morning Glory and Weed 01.jpg',
+        alt: 'Morning Glory and Weed, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Orange Fantail.jpg',
+        full: '/images/portfolio/Patagonia Lake/Orange Fantail.jpg',
+        alt: 'Orange Fantails, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Trailing Four o Clock 01.jpg',
+        full: '/images/portfolio/Patagonia Lake/Trailing Four o Clock 01.jpg',
+        alt: 'Trailing Four-o-Clock, 2025'
+      },
+      {
+        thumbnail: '/images/portfolio/Patagonia Lake/Wildflowers at Patagonia Lake.jpg',
+        full: '/images/portfolio/Patagonia Lake/Wildflowers at Patagonia Lake.jpg',
+        alt: 'Wildflowers, Patagonia Lake, Fall 2025'
+      }
     ]
   };
 
   // Define your portfolio sections
   const portfolioSections = [
+    {
+      title: "Patagonia Lake State Park",
+      coverImage: "/images/portfolio/Patagonia Lake/Spiny Poppy and Hemlock 001.jpg",
+      images: portfolioImages.patagoniaLake,
+      description: "Works created during the Arizona State Parks Artist Residency at Patagonia Lake State Park, Fall 2025. These cyanotypes document the diverse botanical specimens found in one of Arizona's most biologically mixed environments.\n\nSpiny Poppy and Hemlock, 2025\nBirdfoot Morning Glory, 2025\nWild Cucumber, 2025\nHemlock, 2025\nMesquite Saplings, 2025\nMorning Glory and Weed, 2025\nOrange Fantails, 2025\nTrailing Four-o-Clock, 2025\nWildflowers, Patagonia Lake, Fall 2025"
+    },
     {
       title: "New Works",
       coverImage: "/images/portfolio/new_works_2025/full/Evening Primrose May 2025.jpg",
