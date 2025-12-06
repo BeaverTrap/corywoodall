@@ -534,13 +534,15 @@ export default function Home() {
                 className="object-cover"
                 priority
                 quality={100}
+                style={{ filter: 'blur(1px) contrast(0.95)' }}
               />
             </div>
             <div className="absolute inset-0 bg-black/30" />
             <div 
               className="absolute inset-0 bg-white"
-              style={{ opacity: overlayOpacity }}
+              style={{ opacity: Math.max(overlayOpacity, 0.1) }}
             />
+            <div className="absolute inset-0 backdrop-blur-[1px]" />
           </div>
         </div>
 
