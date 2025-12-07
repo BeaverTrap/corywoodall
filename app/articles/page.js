@@ -57,6 +57,14 @@ export default function ArticlesIndex() {
           readingTime: 5,
           preview: 'Cory Woodall is currently spending three weeks at Patagonia Lake State Park as part of the Artist-in-Residence program supported by Arizona State Parks & Trails and the Arizona Commission on the Arts. The residency gives her uninterrupted time to continue her ongoing cyanotype research, working directly with plant material found in one of Arizona\'s most biologically mixed environments.…'
         };
+      } else if (dir.name === 'patagonia-lake-works') {
+        return {
+          slug: dir.name,
+          title: 'Reflections on the Patagonia Lake Works',
+          date: '2025-12-06',
+          readingTime: 6,
+          preview: 'Following the completion of my three-week residency at Patagonia Lake State Park, I\'ve spent time reviewing the dozens of cyanotype prints created during that period. The process of selecting which works would represent this body of work on the website required careful consideration of what these pieces collectively communicate about the location, the process, and the botanical diversity found in that unique environment.…'
+        };
       }
     }
     return null;
