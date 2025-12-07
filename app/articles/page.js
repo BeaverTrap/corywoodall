@@ -63,7 +63,7 @@ export default function ArticlesIndex() {
           title: 'Reflections on the Patagonia Lake Works',
           date: '2025-12-05',
           readingTime: 2,
-          preview: 'Following the completion of my three-week residency at Patagonia Lake State Park, I\'ve spent time reviewing the dozens of cyanotype prints created during that period. The process of selecting which works would represent this body of work on the website required careful consideration of what these pieces collectively communicate about the location, the process, and the botanical diversity found in that unique environment.…'
+          preview: 'During her three-week residency at Patagonia Lake State Park, Cory Woodall created dozens of cyanotype prints working with the plant life found in this unique environment. From this body of work, nine pieces were selected for the portfolio gallery.…'
         };
       }
     }
