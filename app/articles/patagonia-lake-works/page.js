@@ -26,7 +26,7 @@ export const metadata = {
 export default function PatagoniaLakeWorks() {
   const data = {
     title: 'Reflections on the Patagonia Lake Works',
-    date: '2025-12-06',
+    date: '2025-12-05',
     slug: 'patagonia-lake-works'
   };
 
@@ -40,7 +40,7 @@ export default function PatagoniaLakeWorks() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between">
           <h1 className="text-4xl font-bold mb-2 sm:mb-0 text-left">{data.title}</h1>
           <div className="text-sm text-black/60 text-right">
-            <span>{new Date(data.date).toLocaleDateString('en-US', {
+            <span>{new Date(data.date + 'T12:00:00').toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
