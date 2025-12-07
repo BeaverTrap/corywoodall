@@ -477,7 +477,7 @@ export default function Home() {
       title: "Patagonia Lake State Park",
       coverImage: "/images/portfolio/Patagonia Lake/Spiny Poppy and Hemlock 001.jpg",
       images: portfolioImages.patagoniaLake,
-      description: "Works created during the Arizona State Parks Artist Residency at Patagonia Lake State Park, Fall 2025. These cyanotypes document the diverse botanical specimens found in one of Arizona's most biologically mixed environments.\n\nSpiny Poppy and Hemlock, 2025\nBirdfoot Morning Glory, 2025\nWild Cucumber, 2025\nHemlock, 2025\nMesquite Saplings, 2025\nMorning Glory and Weed, 2025\nOrange Fantails, 2025\nTrailing Four-o-Clock, 2025\nWildflowers, Patagonia Lake, Fall 2025"
+      description: "Works created during the Arizona State Parks Artist Residency at Patagonia Lake State Park, Fall 2025. These cyanotypes document the diverse botanical specimens found in one of Arizona's most biologically mixed environments.\n\nSpiny Poppy and Hemlock, 2025\nBirdfoot Morning Glory, 2025\nWild Cucumber, 2025\nHemlock, 2025\nMesquite Saplings, 2025\nMorning Glory and Weed, 2025\nOrange Fantails, 2025\nTrailing Four-o-Clock, 2025\nWildflowers, Patagonia Lake, Fall 2025\n\nRead more about the residency."
     },
     {
       title: "New Works",
@@ -629,12 +629,24 @@ export default function Home() {
                               {section.description.split('\n\n')[0]}
                             </p>
                             
+                            {/* Article link for Patagonia Lake */}
+                            {section.title === "Patagonia Lake State Park" && (
+                              <div className="mb-4">
+                                <Link 
+                                  href="/articles/patagonia-lake-residency"
+                                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200"
+                                >
+                                  Read more about the residency →
+                                </Link>
+                              </div>
+                            )}
+                            
                             {/* Individual image links */}
                             {section.description.split('\n\n').length > 1 && (
                               <div className="mt-4">
                                 <p className="text-sm text-gray-600 mb-2">Works in this series:</p>
                                 <div className="space-y-1">
-                                  {section.description.split('\n\n')[1].split('\n').map((work, workIndex) => (
+                                  {section.description.split('\n\n')[1].split('\n').filter(work => work.trim() && !work.includes('Read more')).map((work, workIndex) => (
                                     <button
                                       key={workIndex}
                                       onClick={() => {
