@@ -46,7 +46,7 @@ export default function PatagoniaLakeWorks() {
               day: 'numeric'
             })}</span>
             <span className="mx-2">·</span>
-            <span>6 min read</span>
+            <span>2 min read</span>
           </div>
         </div>
       </div>
