@@ -9,10 +9,30 @@ export default function SiteEditBar() {
   const supabase = createClient();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setVisible(Boolean(user));
-    });
-  }, [supabase.auth]);
+    let cancelled = false;
+
+    async function checkAccess() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || cancelled) {
+        setVisible(false);
+        return;
+      }
+
+      const { data: isAdmin } = await supabase.rpc('is_admin');
+      if (!cancelled) {
+        setVisible(isAdmin === true);
+      }
+    }
+
+    checkAccess();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase]);
 
   if (!visible) return null;
 

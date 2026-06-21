@@ -12,6 +12,8 @@ import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
 import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
 import ReorderButtons from '@/app/studio/components/ReorderButtons';
 import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
+import PublishedToggle from '@/app/studio/components/PublishedToggle';
+import DeleteConfirmButton from '@/app/studio/components/DeleteConfirmButton';
 import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
 import { GalleryDetailsPreview, GalleryImagesPreview } from '@/app/studio/components/GalleryPreviewSections';
 
@@ -203,6 +205,20 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const deleteGallery = async () => {
+    if (!series.id) return;
+
+    const { error } = await supabase.from('gallery_series').delete().eq('id', series.id);
+    if (error) {
+      setMessage(error.message);
+      setMessageTone('error');
+      return;
+    }
+
+    router.push('/studio/galleries');
+    router.refresh();
+  };
+
   return (
     <>
     <StudioEditorShell
@@ -274,14 +290,13 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
                 placeholder="https://res.cloudinary.com/..."
               />
             </div>
-            <label className="inline-flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={Boolean(series.published)}
-                onChange={(e) => updateSeries('published', e.target.checked)}
-              />
-              Published on homepage
-            </label>
+            <PublishedToggle
+              published={series.published}
+              onChange={(value) => updateSeries('published', value)}
+              checkboxLabel="Published on homepage"
+              draftNote="This gallery is hidden. Visitors will not see it on the homepage portfolio."
+              liveNote="This gallery appears in the homepage portfolio section."
+            />
             <p className="text-xs text-black/50">
               Homepage order is set with move up/down on the galleries list.
             </p>
@@ -359,6 +374,21 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
           </section>
         }
       />
+
+      {!isNew ? (
+        <section className="bg-white border border-red-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-red-900 mb-2">Delete gallery</h3>
+          <p className="text-sm text-black/70 mb-4">
+            Permanently remove &ldquo;{series.title}&rdquo; and all of its images. This cannot be undone.
+          </p>
+          <DeleteConfirmButton
+            label="Delete gallery"
+            confirmMessage={`Delete "${series.title}"? All images in this gallery will be removed permanently.`}
+            onConfirm={deleteGallery}
+            disabled={saving}
+          />
+        </section>
+      ) : null}
     </StudioEditorShell>
     <StudioSaveBar
       saveLabel="Save gallery"

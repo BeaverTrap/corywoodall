@@ -16,7 +16,7 @@ export default function ImageGridWithCaptions({ images, cols = 3, caption }) {
           {images.map((img, index) => (
             <div
               key={index}
-              className="relative w-full h-64 rounded-lg overflow-hidden shadow-lg cursor-pointer"
+              className="relative w-full h-40 sm:h-56 md:h-64 rounded-lg overflow-hidden shadow-lg cursor-pointer"
               onClick={() => setExpandedImage(img.src)}
             >
               <Image

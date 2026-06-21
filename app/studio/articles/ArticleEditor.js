@@ -11,6 +11,8 @@ import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
 import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
 import ReorderButtons from '@/app/studio/components/ReorderButtons';
 import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
+import PublishedToggle from '@/app/studio/components/PublishedToggle';
+import DeleteConfirmButton from '@/app/studio/components/DeleteConfirmButton';
 import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
 import ArticleBlockPreview, { ArticleHeaderPreview } from '@/app/studio/components/ArticleBlockPreview';
 
@@ -223,6 +225,72 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
     router.refresh();
   };
 
+  const duplicateArticle = async () => {
+    if (isNew || !article.id) return;
+
+    if (!window.confirm(`Create a draft copy of "${article.title}"?`)) return;
+
+    setSaving(true);
+    setMessage('');
+
+    const copySlug = slugify(`${article.slug}-copy-${Date.now().toString(36)}`);
+    const { data: copy, error: articleError } = await supabase
+      .from('articles')
+      .insert({
+        title: `${article.title} (copy)`,
+        slug: copySlug,
+        excerpt: article.excerpt,
+        published: false,
+        published_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .select('id')
+      .single();
+
+    if (articleError) {
+      setMessage(articleError.message);
+      setMessageTone('error');
+      setSaving(false);
+      return;
+    }
+
+    const blockRows = blocks.map((block, index) => ({
+      article_id: copy.id,
+      block_type: block.block_type,
+      content: block.content,
+      sort_order: index,
+    }));
+
+    if (blockRows.length) {
+      const { error: blocksError } = await supabase.from('article_blocks').insert(blockRows);
+      if (blocksError) {
+        await supabase.from('articles').delete().eq('id', copy.id);
+        setMessage(blocksError.message);
+        setMessageTone('error');
+        setSaving(false);
+        return;
+      }
+    }
+
+    setSaving(false);
+    router.push(`/studio/articles/${copy.id}`);
+    router.refresh();
+  };
+
+  const deleteArticle = async () => {
+    if (!article.id) return;
+
+    const { error } = await supabase.from('articles').delete().eq('id', article.id);
+    if (error) {
+      setMessage(error.message);
+      setMessageTone('error');
+      return;
+    }
+
+    router.push('/studio/articles');
+    router.refresh();
+  };
+
   const renderBlockEditor = (block, index) => {
     switch (block.block_type) {
       case 'heading':
@@ -382,14 +450,13 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
                 onChange={(e) => updateArticle('excerpt', e.target.value)}
               />
             </div>
-            <label className="inline-flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={Boolean(article.published)}
-                onChange={(e) => updateArticle('published', e.target.checked)}
-              />
-              Published
-            </label>
+            <PublishedToggle
+              published={article.published}
+              onChange={(value) => updateArticle('published', value)}
+              checkboxLabel="Published"
+              draftNote="This article is hidden. Visitors cannot open it at /articles/your-slug."
+              liveNote="This article is public at /articles/your-slug."
+            />
           </section>
         }
       />
@@ -445,6 +512,38 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
           }
         />
       ))}
+
+      {!isNew ? (
+        <section className="bg-white border border-black/10 rounded-lg p-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Duplicate article</h3>
+            <p className="text-sm text-black/70 mb-4">
+              Start a new draft with the same content blocks — useful for a new residency post.
+            </p>
+            <button
+              type="button"
+              onClick={duplicateArticle}
+              disabled={saving}
+              className="px-4 py-2 rounded-lg border border-black/20 text-sm font-medium hover:bg-black/5 disabled:opacity-50"
+            >
+              Duplicate as draft
+            </button>
+          </div>
+
+          <div className="border-t border-red-200 pt-6">
+            <h3 className="text-lg font-semibold text-red-900 mb-2">Delete article</h3>
+            <p className="text-sm text-black/70 mb-4">
+              Permanently remove &ldquo;{article.title}&rdquo; and all of its content blocks.
+            </p>
+            <DeleteConfirmButton
+              label="Delete article"
+              confirmMessage={`Delete "${article.title}"? This cannot be undone.`}
+              onConfirm={deleteArticle}
+              disabled={saving}
+            />
+          </div>
+        </section>
+      ) : null}
     </StudioEditorShell>
     <StudioSaveBar
       saveLabel="Save article"

@@ -7,7 +7,11 @@ import { FaTimes } from 'react-icons/fa';
 export default function ImageWithCaption({ src, alt, caption, isLandscape = false, isSlim = false }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const heightClass = isSlim ? 'h-48' : isLandscape ? 'h-[500px]' : 'h-64';
+  const heightClass = isSlim
+    ? 'h-48'
+    : isLandscape
+      ? 'h-56 sm:h-72 md:h-96 lg:h-[500px]'
+      : 'h-48 sm:h-64';
 
   return (
     <>

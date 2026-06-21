@@ -8,6 +8,8 @@ const navLinks = [
   { href: '/studio/site', label: 'Site content' },
   { href: '/studio/galleries', label: 'Galleries' },
   { href: '/studio/articles', label: 'Articles' },
+  { href: '/studio/help', label: 'Help' },
+  { href: '/studio/admins', label: 'Admins' },
   { href: '/', label: 'View site', muted: true },
 ];
 

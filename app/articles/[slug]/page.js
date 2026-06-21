@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FaTwitter, FaFacebook, FaEnvelope } from 'react-icons/fa';
 import { createClient } from '@/lib/supabase/server';
 import { getArticleBySlug, getAdjacentArticles, estimateReadingTime, isSupabaseConfigured } from '@/lib/content/queries';
+import { getArticleOgImage } from '@/lib/content/articleOgImage';
 import ArticleContent from '@/app/components/ArticleContent';
 import ArticleNavigation from '@/app/components/ArticleNavigation';
 
@@ -15,6 +16,8 @@ export async function generateMetadata({ params }) {
   const article = await getArticleBySlug(supabase, params.slug);
   if (!article) return {};
 
+  const ogImage = getArticleOgImage(article.blocks);
+
   return {
     title: article.title,
     description: article.excerpt,
@@ -23,6 +26,13 @@ export async function generateMetadata({ params }) {
       description: article.excerpt,
       url: `https://corywoodall.com/articles/${article.slug}`,
       type: 'article',
+      ...(ogImage ? { images: [{ url: ogImage, alt: article.title }] } : {}),
+    },
+    twitter: {
+      card: ogImage ? 'summary_large_image' : 'summary',
+      title: article.title,
+      description: article.excerpt,
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
   };
 }
