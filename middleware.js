@@ -6,6 +6,7 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
+    '/studio',
     '/studio/:path*',
     '/auth/:path*',
   ],

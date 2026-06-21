@@ -21,3 +21,6 @@ CREATE POLICY "Users can verify own allowlist entry"
   USING (
     lower(email) = lower(coalesce(auth.email(), auth.jwt() ->> 'email', ''))
   );
+
+GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_admin() TO anon;

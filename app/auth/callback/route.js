@@ -17,7 +17,7 @@ export async function GET(request) {
       } = await supabase.auth.getUser();
 
       if (user?.email) {
-        const allowed = await isAllowedAdmin(supabase);
+        const allowed = await isAllowedAdmin(supabase, user.email);
 
         if (!allowed) {
           await supabase.auth.signOut();
