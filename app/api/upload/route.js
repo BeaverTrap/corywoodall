@@ -17,9 +17,10 @@ export async function POST(request) {
 
   const file = formData.get('file');
   const folder = String(formData.get('folder') || 'uploads');
+  const preset = formData.get('preset') ? String(formData.get('preset')) : undefined;
 
   try {
-    const url = await uploadImageFile(file, folder);
+    const url = await uploadImageFile(file, folder, preset);
     return NextResponse.json({ url });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Image upload failed.';

@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { defaultHomeContent, defaultArticlesIndexContent, defaultSiteMeta } from '@/lib/content/staticSite';
 import { uploadStudioImage } from '@/lib/uploads/client';
+import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
+import { presetHint } from '@/lib/uploads/presets';
+import StudioEditorLayout from '@/app/studio/components/StudioEditorLayout';
+import SitePreview from '@/app/studio/components/SitePreview';
 
 function emptyFaqItem() {
   return { question: '', answer: '', showArticlesLink: false };
@@ -18,6 +22,7 @@ export default function SiteEditor({ initialSections }) {
   );
   const [siteMeta, setSiteMeta] = useState(initialSections?.site_meta || defaultSiteMeta);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -64,6 +69,9 @@ export default function SiteEditor({ initialSections }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setUploading(true);
+    setMessage('Uploading background image...');
+
     try {
       const publicUrl = await uploadStudioImage(file, 'site');
 
@@ -71,8 +79,12 @@ export default function SiteEditor({ initialSections }) {
         ...prev,
         hero: { ...prev.hero, backgroundImage: publicUrl },
       }));
+      setMessage('Background uploaded. Click Save site content to publish.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Image upload failed.');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
     }
   };
 
@@ -93,7 +105,11 @@ export default function SiteEditor({ initialSections }) {
   };
 
   return (
-    <div className="max-w-4xl space-y-8 pb-8">
+    <StudioEditorLayout
+      preview={<SitePreview home={home} articlesIndex={articlesIndex} siteMeta={siteMeta} />}
+      previewLabel="Site preview"
+    >
+      <div className="space-y-8 pb-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <Link href="/studio" className="text-sm text-black/60 hover:underline">
@@ -138,18 +154,28 @@ export default function SiteEditor({ initialSections }) {
           placeholder="Tagline"
         />
         <div className="space-y-2">
+          <label className="block text-sm font-medium">Hero background image</label>
+          {home.hero.backgroundImage && (
+            <img
+              src={home.hero.backgroundImage}
+              alt="Hero background"
+              className="max-h-40 rounded border border-black/10 object-cover"
+            />
+          )}
+          <ImageUploadButton
+            label={uploading ? 'Uploading...' : 'Upload background image'}
+            onChange={uploadBackground}
+            disabled={uploading}
+          />
+          <p className="text-xs text-black/50">{presetHint('hero')}</p>
           <input
             className="w-full border border-black/20 rounded px-3 py-2"
             value={home.hero.backgroundImage}
             onChange={(e) =>
               setHome((prev) => ({ ...prev, hero: { ...prev.hero, backgroundImage: e.target.value } }))
             }
-            placeholder="Background image URL"
+            placeholder="Or paste image URL"
           />
-          <label className="inline-block px-3 py-2 border rounded cursor-pointer text-sm">
-            Upload new background
-            <input type="file" accept="image/*" className="hidden" onChange={uploadBackground} />
-          </label>
         </div>
       </section>
 
@@ -373,6 +399,7 @@ export default function SiteEditor({ initialSections }) {
         </Link>
         . Publish a gallery there to replace the default homepage portfolio.
       </p>
-    </div>
+      </div>
+    </StudioEditorLayout>
   );
 }

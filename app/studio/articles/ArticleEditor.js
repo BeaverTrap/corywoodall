@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/content/queries';
 import { uploadStudioImage } from '@/lib/uploads/client';
+import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
+import StudioEditorLayout from '@/app/studio/components/StudioEditorLayout';
+import ArticlePreview from '@/app/studio/components/ArticlePreview';
 
 const BLOCK_TYPES = [
   { value: 'heading', label: 'Heading' },
@@ -45,6 +48,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   const [article, setArticle] = useState(initialArticle || emptyArticle);
   const [blocks, setBlocks] = useState(initialBlocks);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
   const updateArticle = (field, value) => {
@@ -89,13 +93,21 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   };
 
   const uploadForBlock = async (index, file, imageIndex = null) => {
+    setUploading(true);
+    setMessage('Uploading image...');
+
     let publicUrl;
     try {
-      publicUrl = await uploadStudioImage(file, 'articles');
+      publicUrl = await uploadStudioImage(file, 'articles', 'article');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Image upload failed.');
+      setUploading(false);
       return;
+    } finally {
+      setUploading(false);
     }
+
+    setMessage('Image uploaded. Click Save article when you are done editing.');
 
     const block = blocks[index];
     if (block.block_type === 'image') {
@@ -188,7 +200,11 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   };
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <StudioEditorLayout
+      preview={<ArticlePreview article={article} blocks={blocks} />}
+      previewLabel="Article preview"
+    >
+      <div className="space-y-8">
       <div className="flex items-center justify-between gap-4">
         <div>
           <Link href="/studio/articles" className="text-sm text-black/60 hover:underline">
@@ -246,7 +262,12 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
 
       <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-xl font-semibold">Content blocks</h3>
+          <div>
+            <h3 className="text-xl font-semibold">Content blocks</h3>
+            <p className="text-sm text-black/60 mt-1">
+              Add a <strong>Single image</strong> or <strong>Image grid</strong> block, then use Upload image inside it.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2">
             {BLOCK_TYPES.map((type) => (
               <button
@@ -260,6 +281,13 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
             ))}
           </div>
         </div>
+
+        {blocks.length === 0 && (
+          <p className="text-sm text-black/60 border border-dashed border-black/20 rounded-lg p-4">
+            No content yet. Use the buttons above to add text, headings, or image blocks. Images upload to
+            Cloudinary when you add an image block and click Upload image.
+          </p>
+        )}
 
         {blocks.map((block, index) => (
           <div key={block.id || `block-${index}`} className="border border-black/10 rounded-lg p-4 space-y-3">
@@ -311,15 +339,11 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
                 {block.content.src && (
                   <img src={block.content.src} alt={block.content.alt || ''} className="max-h-48 rounded" />
                 )}
-                <label className="inline-block px-3 py-2 border rounded cursor-pointer">
-                  Upload image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && uploadForBlock(index, e.target.files[0])}
-                  />
-                </label>
+                <ImageUploadButton
+                  label={uploading ? 'Uploading...' : 'Upload image'}
+                  onChange={(e) => e.target.files?.[0] && uploadForBlock(index, e.target.files[0])}
+                  disabled={uploading}
+                />
                 <input
                   className="w-full border border-black/20 rounded px-3 py-2"
                   value={block.content.alt || ''}
@@ -349,17 +373,13 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
                 {(block.content.images || []).map((image, imageIndex) => (
                   <div key={`${image.src}-${imageIndex}`} className="border border-black/10 rounded p-3 space-y-2">
                     {image.src && <img src={image.src} alt={image.alt || ''} className="max-h-32 rounded" />}
-                    <label className="inline-block px-3 py-2 border rounded cursor-pointer text-sm">
-                      Upload
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          e.target.files?.[0] && uploadForBlock(index, e.target.files[0], imageIndex)
-                        }
-                      />
-                    </label>
+                    <ImageUploadButton
+                      label={uploading ? 'Uploading...' : 'Upload image'}
+                      onChange={(e) =>
+                        e.target.files?.[0] && uploadForBlock(index, e.target.files[0], imageIndex)
+                      }
+                      disabled={uploading}
+                    />
                     <input
                       className="w-full border border-black/20 rounded px-3 py-2"
                       value={image.alt || ''}
@@ -395,6 +415,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
           </div>
         ))}
       </section>
-    </div>
+      </div>
+    </StudioEditorLayout>
   );
 }

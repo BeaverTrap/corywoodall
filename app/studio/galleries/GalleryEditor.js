@@ -6,6 +6,10 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/content/queries';
 import { uploadStudioImage } from '@/lib/uploads/client';
+import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
+import { presetHint } from '@/lib/uploads/presets';
+import StudioEditorLayout from '@/app/studio/components/StudioEditorLayout';
+import GalleryPreview from '@/app/studio/components/GalleryPreview';
 
 const emptySeries = {
   title: '',
@@ -24,6 +28,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
   const [series, setSeries] = useState(initialSeries || emptySeries);
   const [images, setImages] = useState(initialImages);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
 
   const updateSeries = (field, value) => {
@@ -113,8 +118,11 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setUploading(true);
+    setMessage('Uploading image...');
+
     try {
-      const publicUrl = await uploadStudioImage(file, 'galleries');
+      const publicUrl = await uploadStudioImage(file, 'galleries', 'gallery');
 
       setImages((prev) => [
         ...prev,
@@ -128,8 +136,32 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
       if (!series.cover_image_url) {
         updateSeries('cover_image_url', publicUrl);
       }
+
+      setMessage('Image uploaded. Click Save gallery when you are done editing.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Image upload failed.');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
+  };
+
+  const uploadCover = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setMessage('Uploading cover image...');
+
+    try {
+      const publicUrl = await uploadStudioImage(file, 'galleries', 'cover');
+      updateSeries('cover_image_url', publicUrl);
+      setMessage('Cover image uploaded. Click Save gallery when you are done editing.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Cover upload failed.');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
     }
   };
 
@@ -150,7 +182,11 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
   };
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <StudioEditorLayout
+      preview={<GalleryPreview series={series} images={images} />}
+      previewLabel="Gallery preview"
+    >
+      <div className="space-y-8">
       <div className="flex items-center justify-between gap-4">
         <div>
           <Link href="/studio/galleries" className="text-sm text-black/60 hover:underline">
@@ -208,11 +244,28 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Cover image URL</label>
+            <label className="block text-sm font-medium mb-1">Cover image</label>
+            {series.cover_image_url && (
+              <img
+                src={series.cover_image_url}
+                alt="Gallery cover"
+                className="mb-3 max-h-40 rounded border border-black/10 object-cover"
+              />
+            )}
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <ImageUploadButton
+                label={uploading ? 'Uploading...' : 'Upload cover image'}
+                onChange={uploadCover}
+                disabled={uploading}
+              />
+              <span className="text-xs text-black/50">or paste a URL below</span>
+            </div>
+            <p className="text-xs text-black/50 mb-2">{presetHint('cover')}</p>
             <input
               className="w-full border border-black/20 rounded px-3 py-2"
               value={series.cover_image_url || ''}
               onChange={(e) => updateSeries('cover_image_url', e.target.value)}
+              placeholder="https://res.cloudinary.com/..."
             />
           </div>
         </div>
@@ -227,12 +280,19 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
       </section>
 
       <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h3 className="text-xl font-semibold">Images</h3>
-          <label className="px-4 py-2 rounded-lg border border-black/20 cursor-pointer hover:bg-black/5">
-            Upload image
-            <input type="file" accept="image/*" className="hidden" onChange={uploadImage} />
-          </label>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-semibold">Gallery images</h3>
+            <p className="text-sm text-black/60 mt-1">
+              Upload photos here. They are stored on Cloudinary, not in Supabase.
+            </p>
+            <p className="text-xs text-black/50 mt-1">{presetHint('gallery')}</p>
+          </div>
+          <ImageUploadButton
+            label={uploading ? 'Uploading...' : '+ Add image'}
+            onChange={uploadImage}
+            disabled={uploading}
+          />
         </div>
 
         {images.length === 0 && (
@@ -289,6 +349,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
           ))}
         </div>
       </section>
-    </div>
+      </div>
+    </StudioEditorLayout>
   );
 }
