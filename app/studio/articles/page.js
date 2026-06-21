@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import ImportArticlesButton from './ImportArticlesButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,26 +26,41 @@ export default async function ArticlesPage() {
         </Link>
       </div>
 
+      <ImportArticlesButton show={!articles?.length} />
+
       <div className="space-y-3">
         {(articles || []).map((article) => (
-          <Link
+          <div
             key={article.id}
-            href={`/studio/articles/${article.id}`}
-            className="block bg-white border border-black/10 rounded-lg p-4 hover:border-black/30 transition-colors"
+            className="bg-white border border-black/10 rounded-lg p-4 hover:border-black/30 transition-colors"
           >
-            <div className="flex items-center justify-between gap-4">
-              <div>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <Link href={`/studio/articles/${article.id}`} className="flex-1 min-w-[200px] hover:underline">
                 <p className="font-semibold">{article.title}</p>
                 <p className="text-sm text-black/60">/articles/{article.slug}</p>
+              </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className={`text-sm ${article.published ? 'text-green-700' : 'text-amber-700'}`}>
+                  {article.published ? 'Published' : 'Draft'}
+                </p>
+                {article.published ? (
+                  <Link
+                    href={`/articles/${article.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm px-3 py-1 border border-black/20 rounded hover:bg-black/5"
+                  >
+                    View on site
+                  </Link>
+                ) : null}
               </div>
-              <p className={`text-sm ${article.published ? 'text-green-700' : 'text-amber-700'}`}>
-                {article.published ? 'Published' : 'Draft'}
-              </p>
             </div>
-          </Link>
+          </div>
         ))}
         {!articles?.length && (
-          <p className="text-black/60">No articles in the database yet. Existing static articles remain live until you publish CMS articles.</p>
+          <p className="text-black/60">
+            No articles yet. Use Import existing articles to load the original site content, or create a new article.
+          </p>
         )}
       </div>
     </div>

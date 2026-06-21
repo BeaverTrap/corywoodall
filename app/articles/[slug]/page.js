@@ -2,8 +2,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { FaTwitter, FaFacebook, FaEnvelope } from 'react-icons/fa';
 import { createClient } from '@/lib/supabase/server';
-import { getArticleBySlug, estimateReadingTime, isSupabaseConfigured } from '@/lib/content/queries';
+import { getArticleBySlug, getAdjacentArticles, estimateReadingTime, isSupabaseConfigured } from '@/lib/content/queries';
 import ArticleContent from '@/app/components/ArticleContent';
+import ArticleNavigation from '@/app/components/ArticleNavigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,7 @@ export default async function CmsArticlePage({ params }) {
   if (!article) notFound();
 
   const readingTime = estimateReadingTime(article.blocks);
+  const { previous, next } = await getAdjacentArticles(supabase, params.slug);
   const pageUrl = `https://corywoodall.com/articles/${article.slug}`;
   const shareText = encodeURIComponent(article.title);
 
@@ -41,7 +43,9 @@ export default async function CmsArticlePage({ params }) {
     <div className="py-8">
       <div className="mb-2">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="text-4xl font-bold mb-2 sm:mb-0 text-left">{article.title}</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-0 text-left leading-tight">
+            {article.title}
+          </h1>
           <div className="text-sm text-black/60 text-right">
             <span>
               {article.published_at
@@ -90,7 +94,9 @@ export default async function CmsArticlePage({ params }) {
 
       <ArticleContent blocks={article.blocks} />
 
-      <div className="mt-12 pt-8 border-t border-black/10">
+      <ArticleNavigation previous={previous} next={next} />
+
+      <div className="mt-8 pt-8 border-t border-black/10">
         <Link href="/articles" className="text-black/70 hover:text-black hover:underline">
           ← Back to articles
         </Link>

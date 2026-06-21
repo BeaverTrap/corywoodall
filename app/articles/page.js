@@ -1,80 +1,15 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getPublishedArticles, estimateReadingTime, isSupabaseConfigured, getSiteContent } from '@/lib/content/queries';
-
-const articlesDirectory = path.join(process.cwd(), 'app/articles');
-
-function getStaticArticles() {
-  const entries = fs.readdirSync(articlesDirectory, { withFileTypes: true });
-  const articleDirs = entries.filter(
-    (entry) => entry.isDirectory() && !['[slug]'].includes(entry.name)
-  );
-
-  return articleDirs
-    .map((dir) => {
-      const mdxPath = path.join(articlesDirectory, dir.name, 'page.mdx');
-      const jsPath = path.join(articlesDirectory, dir.name, 'page.js');
-
-      if (fs.existsSync(mdxPath)) {
-        const fileContents = fs.readFileSync(mdxPath, 'utf8');
-        const { data, content } = matter(fileContents);
-        const words = content ? content.split(/\s+/).length : 0;
-        const readingTime = Math.max(1, Math.round(words / 200));
-        const preview = content ? `${content.split(/\s+/).slice(0, 40).join(' ')}…` : '';
-        return {
-          slug: dir.name,
-          title: data.title,
-          date: data.date,
-          readingTime,
-          preview,
-        };
-      }
-
-      if (fs.existsSync(jsPath)) {
-        if (dir.name === 'what-is-a-cyanotype') {
-          return {
-            slug: dir.name,
-            title: 'What is a Cyanotype?',
-            date: '2025-07-12',
-            readingTime: 4,
-            preview:
-              'The medium of cyanotype is a photographic one, created with a careful mixture of light sensitive chemicals coated onto a support surface and exposed to ultraviolet light, leaving behind areas of light and dark—shadows, essentially. This shadow-fixing process is the basis of all non-digital photography since its invention in 1839.…',
-          };
-        }
-        if (dir.name === 'arizona-state-parks-artist-residency-2025') {
-          return {
-            slug: dir.name,
-            title: 'Cory Woodall Selected for Arizona State Parks Artist Residency',
-            date: '2025-10-24',
-            readingTime: 4,
-            preview:
-              'Flagstaff-based artist Cory Woodall has been selected for the Arizona State Parks Artist Residency Program, hosted at Patagonia Lake State Park and presented in collaboration with Arizona State Parks and Trails and the Arizona Commission on the Arts. During the three-week residency, Cory will continue her exploration of the historic cyanotype process.…',
-          };
-        }
-        if (dir.name === 'patagonia-lake-residency') {
-          return {
-            slug: dir.name,
-            title: 'Artist in Residence: Patagonia Lake State Park',
-            date: '2025-11-14',
-            readingTime: 5,
-            preview:
-              "Cory Woodall is currently spending three weeks at Patagonia Lake State Park as part of the Artist-in-Residence program supported by Arizona State Parks & Trails and the Arizona Commission on the Arts. The residency gives her uninterrupted time to continue her ongoing cyanotype research, working directly with plant material found in one of Arizona's most biologically mixed environments.…",
-          };
-        }
-      }
-
-      return null;
-    })
-    .filter(Boolean);
-}
+import { getStaticArticleSummaries } from '@/lib/content/staticArticles';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ArticlesIndex() {
-  let articles = getStaticArticles();
+  let articles = getStaticArticleSummaries().map((article) => ({
+    ...article,
+    readingTime: Math.max(1, Math.round(article.preview.split(/\s+/).length / 200)),
+  }));
   let articlesIndex = {
     title: 'ARTICLES',
     subtitle: 'Insights into cyanotype art, historical processes, and contemporary applications',

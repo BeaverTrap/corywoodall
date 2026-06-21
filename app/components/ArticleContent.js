@@ -1,6 +1,27 @@
 import ImageWithCaption from './ImageWithCaption';
 import ImageGridWithCaptions from './ImageGridWithCaptions';
 
+function renderTextBlock(block) {
+  const body = block.content?.body || '';
+  const className = 'text-lg leading-relaxed tracking-wide whitespace-pre-line';
+
+  if (body.includes('<')) {
+    return (
+      <div
+        key={block.id}
+        className={className}
+        dangerouslySetInnerHTML={{ __html: body }}
+      />
+    );
+  }
+
+  return (
+    <p key={block.id} className={className}>
+      {body}
+    </p>
+  );
+}
+
 export default function ArticleContent({ blocks }) {
   return (
     <div className="space-y-6">
@@ -15,11 +36,7 @@ export default function ArticleContent({ blocks }) {
             );
           }
           case 'text':
-            return (
-              <p key={block.id} className="text-lg leading-relaxed tracking-wide whitespace-pre-line">
-                {block.content?.body}
-              </p>
-            );
+            return renderTextBlock(block);
           case 'image':
             return block.content?.src ? (
               <ImageWithCaption

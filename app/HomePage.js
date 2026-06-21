@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navigation from './components/Navigation';
 import SiteEditBar from './components/SiteEditBar';
+import ContactForm from './components/ContactForm';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
@@ -479,6 +480,8 @@ export default function Home({ portfolioSections, siteContent }) {
                         {contact.footerNote}
                       </p>
                     </div>
+
+                    <ContactForm />
                   </div>
                 </div>
               </div>

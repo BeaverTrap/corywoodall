@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -8,8 +8,12 @@ import { slugify } from '@/lib/content/queries';
 import { uploadStudioImage } from '@/lib/uploads/client';
 import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
 import { presetHint } from '@/lib/uploads/presets';
-import StudioEditorLayout from '@/app/studio/components/StudioEditorLayout';
-import GalleryPreview from '@/app/studio/components/GalleryPreview';
+import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
+import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
+import ReorderButtons from '@/app/studio/components/ReorderButtons';
+import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
+import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
+import { GalleryDetailsPreview, GalleryImagesPreview } from '@/app/studio/components/GalleryPreviewSections';
 
 const emptySeries = {
   title: '',
@@ -30,6 +34,18 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageTone, setMessageTone] = useState('info');
+  const [savedSnapshot, setSavedSnapshot] = useState('');
+
+  const currentSnapshot = useMemo(() => JSON.stringify({ series, images }), [series, images]);
+  const isDirty = Boolean(savedSnapshot) && currentSnapshot !== savedSnapshot;
+  useUnsavedChanges(isDirty);
+
+  useEffect(() => {
+    setSavedSnapshot(JSON.stringify({ series: initialSeries || emptySeries, images: initialImages }));
+  }, [initialSeries, initialImages]);
+
+  const viewHref = series.published && series.slug ? '/#portfolio' : null;
 
   const updateSeries = (field, value) => {
     setSeries((prev) => {
@@ -65,6 +81,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
         .single();
       if (error) {
         setMessage(error.message);
+        setMessageTone('error');
         setSaving(false);
         return;
       }
@@ -73,6 +90,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
       const { error } = await supabase.from('gallery_series').update(payload).eq('id', series.id);
       if (error) {
         setMessage(error.message);
+        setMessageTone('error');
         setSaving(false);
         return;
       }
@@ -95,6 +113,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
           .eq('id', image.id);
         if (error) {
           setMessage(error.message);
+          setMessageTone('error');
           setSaving(false);
           return;
         }
@@ -102,6 +121,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
         const { error } = await supabase.from('gallery_images').insert(imagePayload);
         if (error) {
           setMessage(error.message);
+          setMessageTone('error');
           setSaving(false);
           return;
         }
@@ -109,7 +129,9 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
     }
 
     setSaving(false);
-    setMessage('Saved.');
+    setMessage('Saved — gallery updates are live when published.');
+    setMessageTone('success');
+    setSavedSnapshot(currentSnapshot);
     router.push(`/studio/galleries/${seriesId}`);
     router.refresh();
   };
@@ -182,174 +204,172 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
   };
 
   return (
-    <StudioEditorLayout
-      preview={<GalleryPreview series={series} images={images} />}
-      previewLabel="Gallery preview"
-    >
-      <div className="space-y-8">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <Link href="/studio/galleries" className="text-sm text-black/60 hover:underline">
-            ← Back to galleries
-          </Link>
-          <h2 className="text-3xl font-bold mt-2">{isNew ? 'New gallery' : 'Edit gallery'}</h2>
-        </div>
-        <button
-          type="button"
-          onClick={saveSeries}
-          disabled={saving || !series.title}
-          className="px-5 py-2.5 rounded-lg bg-black text-white disabled:opacity-50"
-        >
-          {saving ? 'Saving...' : 'Save gallery'}
-        </button>
-      </div>
-
-      {message && <p className="text-sm text-black/70">{message}</p>}
-
-      <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Title</label>
-          <input
-            className="w-full border border-black/20 rounded px-3 py-2"
-            value={series.title}
-            onChange={(e) => updateSeries('title', e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">URL slug</label>
-          <input
-            className="w-full border border-black/20 rounded px-3 py-2"
-            value={series.slug}
-            onChange={(e) => updateSeries('slug', slugify(e.target.value))}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea
-            rows={6}
-            className="w-full border border-black/20 rounded px-3 py-2"
-            value={series.description}
-            onChange={(e) => updateSeries('description', e.target.value)}
-            placeholder="Series overview. Use a blank line, then list individual works on separate lines."
-          />
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
+    <>
+    <StudioEditorShell
+      header={
+        <>
           <div>
-            <label className="block text-sm font-medium mb-1">Display order</label>
-            <input
-              type="number"
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={series.sort_order}
-              onChange={(e) => updateSeries('sort_order', e.target.value)}
-            />
+            <Link href="/studio/galleries" className="text-sm text-black/60 hover:underline">
+              ← Back to galleries
+            </Link>
+            <h2 className="text-3xl font-bold mt-2">{isNew ? 'New gallery' : 'Edit gallery'}</h2>
+            {isDirty ? <p className="text-sm text-amber-700 mt-2">Unsaved changes</p> : null}
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Cover image</label>
-            {series.cover_image_url && (
-              <img
-                src={series.cover_image_url}
-                alt="Gallery cover"
-                className="mb-3 max-h-40 rounded border border-black/10 object-cover"
+        </>
+      }
+    >
+      <EditorPreviewRow
+        label="Gallery details preview"
+        preview={<GalleryDetailsPreview series={series} />}
+        editor={
+          <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
+            <div>
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                className="w-full border border-black/20 rounded px-3 py-2"
+                value={series.title}
+                onChange={(e) => updateSeries('title', e.target.value)}
               />
-            )}
-            <div className="flex flex-wrap items-center gap-3 mb-2">
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">URL slug</label>
+              <input
+                className="w-full border border-black/20 rounded px-3 py-2"
+                value={series.slug}
+                onChange={(e) => updateSeries('slug', slugify(e.target.value))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                rows={6}
+                className="w-full border border-black/20 rounded px-3 py-2"
+                value={series.description}
+                onChange={(e) => updateSeries('description', e.target.value)}
+                placeholder="Series overview. Use a blank line, then list individual works on separate lines."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Cover image</label>
+              {series.cover_image_url ? (
+                <img
+                  src={series.cover_image_url}
+                  alt="Gallery cover"
+                  className="mb-3 max-h-40 rounded border border-black/10 object-cover"
+                />
+              ) : null}
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <ImageUploadButton
+                  label={uploading ? 'Uploading...' : 'Upload cover image'}
+                  onChange={uploadCover}
+                  disabled={uploading}
+                />
+                <span className="text-xs text-black/50">or paste a URL below</span>
+              </div>
+              <p className="text-xs text-black/50 mb-2">{presetHint('cover')}</p>
+              <input
+                className="w-full border border-black/20 rounded px-3 py-2"
+                value={series.cover_image_url || ''}
+                onChange={(e) => updateSeries('cover_image_url', e.target.value)}
+                placeholder="https://res.cloudinary.com/..."
+              />
+            </div>
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={Boolean(series.published)}
+                onChange={(e) => updateSeries('published', e.target.checked)}
+              />
+              Published on homepage
+            </label>
+            <p className="text-xs text-black/50">
+              Homepage order is set with move up/down on the galleries list.
+            </p>
+          </section>
+        }
+      />
+
+      <EditorPreviewRow
+        label="Gallery images preview"
+        preview={<GalleryImagesPreview images={images} />}
+        editor={
+          <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-semibold">Gallery images</h3>
+                <p className="text-sm text-black/60 mt-1">
+                  Upload photos here. They are stored on Cloudinary, not in Supabase.
+                </p>
+                <p className="text-xs text-black/50 mt-1">{presetHint('gallery')}</p>
+              </div>
               <ImageUploadButton
-                label={uploading ? 'Uploading...' : 'Upload cover image'}
-                onChange={uploadCover}
+                label={uploading ? 'Uploading...' : '+ Add image'}
+                onChange={uploadImage}
                 disabled={uploading}
               />
-              <span className="text-xs text-black/50">or paste a URL below</span>
             </div>
-            <p className="text-xs text-black/50 mb-2">{presetHint('cover')}</p>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={series.cover_image_url || ''}
-              onChange={(e) => updateSeries('cover_image_url', e.target.value)}
-              placeholder="https://res.cloudinary.com/..."
-            />
-          </div>
-        </div>
-        <label className="inline-flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={Boolean(series.published)}
-            onChange={(e) => updateSeries('published', e.target.checked)}
-          />
-          Published on homepage
-        </label>
-      </section>
 
-      <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 className="text-xl font-semibold">Gallery images</h3>
-            <p className="text-sm text-black/60 mt-1">
-              Upload photos here. They are stored on Cloudinary, not in Supabase.
-            </p>
-            <p className="text-xs text-black/50 mt-1">{presetHint('gallery')}</p>
-          </div>
-          <ImageUploadButton
-            label={uploading ? 'Uploading...' : '+ Add image'}
-            onChange={uploadImage}
-            disabled={uploading}
-          />
-        </div>
+            {images.length === 0 ? (
+              <p className="text-sm text-black/60">No images yet. Upload images to build this gallery.</p>
+            ) : null}
 
-        {images.length === 0 && (
-          <p className="text-sm text-black/60">No images yet. Upload images to build this gallery.</p>
-        )}
-
-        <div className="space-y-4">
-          {images.map((image, index) => (
-            <div key={image.id || `${image.image_url}-${index}`} className="border border-black/10 rounded-lg p-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <img
-                  src={image.thumbnail_url || image.image_url}
-                  alt={image.alt_text || 'Gallery image'}
-                  className="w-full sm:w-32 h-32 object-cover rounded"
-                />
-                <div className="flex-1 space-y-3">
-                  <input
-                    className="w-full border border-black/20 rounded px-3 py-2"
-                    value={image.alt_text || ''}
-                    onChange={(e) =>
-                      setImages((prev) =>
-                        prev.map((item, i) =>
-                          i === index ? { ...item, alt_text: e.target.value } : item
-                        )
-                      )
-                    }
-                    placeholder="Caption / alt text"
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" className="px-3 py-1 border rounded" onClick={() => moveImage(index, -1)}>
-                      Move up
-                    </button>
-                    <button type="button" className="px-3 py-1 border rounded" onClick={() => moveImage(index, 1)}>
-                      Move down
-                    </button>
-                    <button
-                      type="button"
-                      className="px-3 py-1 border rounded text-red-700"
-                      onClick={() => removeImage(index)}
-                    >
-                      Remove
-                    </button>
-                    <button
-                      type="button"
-                      className="px-3 py-1 border rounded"
-                      onClick={() => updateSeries('cover_image_url', image.image_url)}
-                    >
-                      Set as cover
-                    </button>
+            <div className="space-y-4">
+              {images.map((image, index) => (
+                <div key={image.id || `${image.image_url}-${index}`} className="border border-black/10 rounded-lg p-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <img
+                      src={image.thumbnail_url || image.image_url}
+                      alt={image.alt_text || 'Gallery image'}
+                      className="w-full sm:w-32 h-32 object-cover rounded"
+                    />
+                    <div className="flex-1 space-y-3">
+                      <input
+                        className="w-full border border-black/20 rounded px-3 py-2"
+                        value={image.alt_text || ''}
+                        onChange={(e) =>
+                          setImages((prev) =>
+                            prev.map((item, i) =>
+                              i === index ? { ...item, alt_text: e.target.value } : item
+                            )
+                          )
+                        }
+                        placeholder="Caption / alt text"
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        <ReorderButtons
+                          disableUp={index === 0}
+                          disableDown={index === images.length - 1}
+                          onMoveUp={() => moveImage(index, -1)}
+                          onMoveDown={() => moveImage(index, 1)}
+                          onRemove={() => removeImage(index)}
+                        />
+                        <button
+                          type="button"
+                          className="px-3 py-1 border rounded text-sm"
+                          onClick={() => updateSeries('cover_image_url', image.image_url)}
+                        >
+                          Set as cover
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
-      </div>
-    </StudioEditorLayout>
+          </section>
+        }
+      />
+    </StudioEditorShell>
+    <StudioSaveBar
+      saveLabel="Save gallery"
+      onSave={saveSeries}
+      saving={saving}
+      disabled={!series.title}
+      viewHref={viewHref}
+      viewLabel="View on homepage"
+      message={message}
+      messageTone={messageTone}
+    />
+    </>
   );
 }

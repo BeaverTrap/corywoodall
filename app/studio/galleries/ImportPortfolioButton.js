@@ -6,11 +6,13 @@ import { createClient } from '@/lib/supabase/client';
 import { staticPortfolioSections } from '@/lib/content/staticPortfolio';
 import { slugify } from '@/lib/content/queries';
 
-export default function ImportPortfolioButton() {
+export default function ImportPortfolioButton({ show = true }) {
   const router = useRouter();
   const supabase = createClient();
   const [importing, setImporting] = useState(false);
   const [message, setMessage] = useState('');
+
+  if (!show) return null;
 
   const importPortfolio = async () => {
     setImporting(true);
