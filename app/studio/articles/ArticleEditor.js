@@ -9,11 +9,13 @@ import { uploadStudioImage } from '@/lib/uploads/client';
 import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
 import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
 import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
-import ReorderButtons from '@/app/studio/components/ReorderButtons';
+import SortableList from '@/app/studio/components/SortableList';
+import ReorderControls from '@/app/studio/components/ReorderControls';
 import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
 import PublishedToggle from '@/app/studio/components/PublishedToggle';
 import DeleteConfirmButton from '@/app/studio/components/DeleteConfirmButton';
 import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
+import { useStudioAutoSave } from '@/app/studio/hooks/useStudioAutoSave';
 import ArticleBlockPreview, { ArticleHeaderPreview } from '@/app/studio/components/ArticleBlockPreview';
 
 const BLOCK_TYPES = [
@@ -27,6 +29,8 @@ const emptyArticle = {
   title: '',
   slug: '',
   excerpt: '',
+  meta_title: '',
+  meta_description: '',
   published: false,
   published_at: null,
 };
@@ -49,10 +53,9 @@ function defaultContent(type) {
 export default function ArticleEditor({ initialArticle = null, initialBlocks = [] }) {
   const router = useRouter();
   const supabase = createClient();
-  const isNew = !initialArticle?.id;
-
   const [article, setArticle] = useState(initialArticle || emptyArticle);
   const [blocks, setBlocks] = useState(initialBlocks);
+  const isNew = !article.id;
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
@@ -94,14 +97,6 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
     setBlocks((prev) => prev.map((block, i) => (i === index ? { ...block, content } : block)));
   };
 
-  const moveBlock = (index, direction) => {
-    const target = index + direction;
-    if (target < 0 || target >= blocks.length) return;
-    const next = [...blocks];
-    [next[index], next[target]] = [next[target], next[index]];
-    setBlocks(next);
-  };
-
   const removeBlock = async (index) => {
     const block = blocks[index];
     if (block.id) {
@@ -126,7 +121,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
       setUploading(false);
     }
 
-    setMessage('Image uploaded. Click Save article when you are done editing.');
+    setMessage('Image uploaded. Changes auto-save after a short pause.');
     setMessageTone('info');
 
     const block = blocks[index];
@@ -151,9 +146,11 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
     }
   };
 
-  const saveArticle = async () => {
+  const saveArticle = async ({ auto = false } = {}) => {
+    if (!article.title?.trim()) return;
+
     setSaving(true);
-    setMessage('');
+    if (!auto) setMessage('');
 
     const publishedAt = article.published
       ? article.published_at || new Date().toISOString()
@@ -163,6 +160,8 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
       title: article.title,
       slug: article.slug,
       excerpt: article.excerpt,
+      meta_title: article.meta_title?.trim() || null,
+      meta_description: article.meta_description?.trim() || null,
       published: Boolean(article.published),
       published_at: publishedAt,
       updated_at: new Date().toISOString(),
@@ -179,6 +178,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
         return;
       }
       articleId = data.id;
+      setArticle((prev) => ({ ...prev, id: data.id }));
     } else {
       const { error } = await supabase.from('articles').update(payload).eq('id', article.id);
       if (error) {
@@ -189,8 +189,10 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
       }
     }
 
-    for (let index = 0; index < blocks.length; index += 1) {
-      const block = blocks[index];
+    const nextBlocks = [...blocks];
+
+    for (let index = 0; index < nextBlocks.length; index += 1) {
+      const block = nextBlocks[index];
       const blockPayload = {
         article_id: articleId,
         block_type: block.block_type,
@@ -207,23 +209,44 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
           return;
         }
       } else {
-        const { error } = await supabase.from('article_blocks').insert(blockPayload);
+        const { data, error } = await supabase
+          .from('article_blocks')
+          .insert(blockPayload)
+          .select('id')
+          .single();
         if (error) {
           setMessage(error.message);
           setMessageTone('error');
           setSaving(false);
           return;
         }
+        nextBlocks[index] = { ...block, id: data.id };
       }
     }
 
+    setBlocks(nextBlocks);
+    setArticle((prev) => ({ ...prev, id: articleId }));
+
     setSaving(false);
-    setMessage('Saved — article updates are live when published.');
+    setMessage(
+      auto
+        ? 'Auto-saved — article updates are live when published.'
+        : 'Saved — article updates are live when published.'
+    );
     setMessageTone('success');
-    setSavedSnapshot(currentSnapshot);
-    router.push(`/studio/articles/${articleId}`);
-    router.refresh();
+    setSavedSnapshot(JSON.stringify({ article: { ...article, id: articleId }, blocks: nextBlocks }));
+
+    if (!auto) {
+      router.push(`/studio/articles/${articleId}`);
+      router.refresh();
+    }
   };
+
+  useStudioAutoSave({
+    enabled: Boolean(article.title?.trim()) && !saving && !uploading,
+    isDirty,
+    onAutoSave: () => saveArticle({ auto: true }),
+  });
 
   const duplicateArticle = async () => {
     if (isNew || !article.id) return;
@@ -240,6 +263,8 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
         title: `${article.title} (copy)`,
         slug: copySlug,
         excerpt: article.excerpt,
+        meta_title: article.meta_title,
+        meta_description: article.meta_description,
         published: false,
         published_at: null,
         updated_at: new Date().toISOString(),
@@ -450,6 +475,28 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
                 onChange={(e) => updateArticle('excerpt', e.target.value)}
               />
             </div>
+            <div className="border-t border-black/10 pt-4 space-y-4">
+              <h4 className="text-sm font-semibold">SEO (optional)</h4>
+              <div>
+                <label className="block text-sm font-medium mb-1">Meta title</label>
+                <input
+                  className="w-full border border-black/20 rounded px-3 py-2"
+                  value={article.meta_title || ''}
+                  onChange={(e) => updateArticle('meta_title', e.target.value)}
+                  placeholder={article.title || 'Defaults to article title'}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Meta description</label>
+                <textarea
+                  rows={2}
+                  className="w-full border border-black/20 rounded px-3 py-2"
+                  value={article.meta_description || ''}
+                  onChange={(e) => updateArticle('meta_description', e.target.value)}
+                  placeholder={article.excerpt || 'Defaults to excerpt'}
+                />
+              </div>
+            </div>
             <PublishedToggle
               published={article.published}
               onChange={(value) => updateArticle('published', value)}
@@ -466,7 +513,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
           <div>
             <h3 className="text-xl font-semibold">Content blocks</h3>
             <p className="text-sm text-black/60 mt-1">
-              Add a <strong>Single image</strong> or <strong>Image grid</strong> block, then use Upload image inside it.
+              Drag blocks to reorder. Add a <strong>Single image</strong> or <strong>Image grid</strong> block, then use Upload image inside it.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -490,28 +537,30 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
         ) : null}
       </div>
 
-      {blocks.map((block, index) => (
-        <EditorPreviewRow
-          key={block.id || `block-${index}`}
-          label={`${block.block_type.replace('_', ' ')} preview`}
-          preview={<ArticleBlockPreview block={block} />}
-          editor={
-            <div className="border border-black/10 rounded-lg p-4 space-y-3 h-full bg-white">
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-medium capitalize">{block.block_type.replace('_', ' ')}</p>
-                <ReorderButtons
-                  disableUp={index === 0}
-                  disableDown={index === blocks.length - 1}
-                  onMoveUp={() => moveBlock(index, -1)}
-                  onMoveDown={() => moveBlock(index, 1)}
-                  onRemove={() => removeBlock(index)}
-                />
+      <SortableList
+        items={blocks}
+        onReorder={setBlocks}
+        getItemKey={(block, index) => block.id || `block-${index}`}
+        className="space-y-6"
+        renderItem={(block, index, { dragHandleProps }) => (
+          <EditorPreviewRow
+            label={`${block.block_type.replace('_', ' ')} preview`}
+            preview={<ArticleBlockPreview block={block} />}
+            editor={
+              <div className="border border-black/10 rounded-lg p-4 space-y-3 h-full bg-white">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-medium capitalize">{block.block_type.replace('_', ' ')}</p>
+                  <ReorderControls
+                    dragHandleProps={dragHandleProps}
+                    onRemove={() => removeBlock(index)}
+                  />
+                </div>
+                {renderBlockEditor(block, index)}
               </div>
-              {renderBlockEditor(block, index)}
-            </div>
-          }
-        />
-      ))}
+            }
+          />
+        )}
+      />
 
       {!isNew ? (
         <section className="bg-white border border-black/10 rounded-lg p-6 space-y-6">

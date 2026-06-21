@@ -10,11 +10,13 @@ import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
 import { presetHint } from '@/lib/uploads/presets';
 import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
 import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
-import ReorderButtons from '@/app/studio/components/ReorderButtons';
+import SortableList from '@/app/studio/components/SortableList';
+import ReorderControls from '@/app/studio/components/ReorderControls';
 import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
 import PublishedToggle from '@/app/studio/components/PublishedToggle';
 import DeleteConfirmButton from '@/app/studio/components/DeleteConfirmButton';
 import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
+import { useStudioAutoSave } from '@/app/studio/hooks/useStudioAutoSave';
 import { GalleryDetailsPreview, GalleryImagesPreview } from '@/app/studio/components/GalleryPreviewSections';
 
 const emptySeries = {
@@ -29,7 +31,7 @@ const emptySeries = {
 export default function GalleryEditor({ initialSeries = null, initialImages = [] }) {
   const router = useRouter();
   const supabase = createClient();
-  const isNew = !initialSeries?.id;
+  const isNew = !series.id;
 
   const [series, setSeries] = useState(initialSeries || emptySeries);
   const [images, setImages] = useState(initialImages);
@@ -59,9 +61,11 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
     });
   };
 
-  const saveSeries = async () => {
+  const saveSeries = async ({ auto = false } = {}) => {
+    if (!series.title?.trim()) return;
+
     setSaving(true);
-    setMessage('');
+    if (!auto) setMessage('');
 
     const payload = {
       title: series.title,
@@ -88,6 +92,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
         return;
       }
       seriesId = data.id;
+      setSeries((prev) => ({ ...prev, id: data.id }));
     } else {
       const { error } = await supabase.from('gallery_series').update(payload).eq('id', series.id);
       if (error) {
@@ -98,8 +103,10 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
       }
     }
 
-    for (let index = 0; index < images.length; index += 1) {
-      const image = images[index];
+    const nextImages = [...images];
+
+    for (let index = 0; index < nextImages.length; index += 1) {
+      const image = nextImages[index];
       const imagePayload = {
         series_id: seriesId,
         image_url: image.image_url,
@@ -120,23 +127,44 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
           return;
         }
       } else {
-        const { error } = await supabase.from('gallery_images').insert(imagePayload);
+        const { data, error } = await supabase
+          .from('gallery_images')
+          .insert(imagePayload)
+          .select('id')
+          .single();
         if (error) {
           setMessage(error.message);
           setMessageTone('error');
           setSaving(false);
           return;
         }
+        nextImages[index] = { ...image, id: data.id };
       }
     }
 
+    setImages(nextImages);
+    setSeries((prev) => ({ ...prev, id: seriesId }));
+
     setSaving(false);
-    setMessage('Saved — gallery updates are live when published.');
+    setMessage(
+      auto
+        ? 'Auto-saved — gallery updates are live when published.'
+        : 'Saved — gallery updates are live when published.'
+    );
     setMessageTone('success');
-    setSavedSnapshot(currentSnapshot);
-    router.push(`/studio/galleries/${seriesId}`);
-    router.refresh();
+    setSavedSnapshot(JSON.stringify({ series: { ...series, id: seriesId }, images: nextImages }));
+
+    if (!auto) {
+      router.push(`/studio/galleries/${seriesId}`);
+      router.refresh();
+    }
   };
+
+  useStudioAutoSave({
+    enabled: Boolean(series.title?.trim()) && !saving && !uploading,
+    isDirty,
+    onAutoSave: () => saveSeries({ auto: true }),
+  });
 
   const uploadImage = async (event) => {
     const file = event.target.files?.[0];
@@ -170,6 +198,44 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
     }
   };
 
+  const uploadImagesBulk = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    setUploading(true);
+    setMessage(`Uploading ${files.length} image${files.length > 1 ? 's' : ''}...`);
+    setMessageTone('info');
+
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        const publicUrl = await uploadStudioImage(file, 'galleries', 'gallery');
+        uploaded.push({
+          image_url: publicUrl,
+          thumbnail_url: publicUrl,
+          alt_text: file.name.replace(/\.[^.]+$/, ''),
+        });
+      }
+
+      setImages((prev) => [...prev, ...uploaded]);
+
+      if (!series.cover_image_url && uploaded[0]?.image_url) {
+        updateSeries('cover_image_url', uploaded[0].image_url);
+      }
+
+      setMessage(
+        `${uploaded.length} image${uploaded.length > 1 ? 's' : ''} uploaded. Changes auto-save after a short pause.`
+      );
+      setMessageTone('info');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Image upload failed.');
+      setMessageTone('error');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
+  };
+
   const uploadCover = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -187,14 +253,6 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
       setUploading(false);
       event.target.value = '';
     }
-  };
-
-  const moveImage = (index, direction) => {
-    const target = index + direction;
-    if (target < 0 || target >= images.length) return;
-    const next = [...images];
-    [next[index], next[target]] = [next[target], next[index]];
-    setImages(next);
   };
 
   const removeImage = async (index) => {
@@ -298,7 +356,7 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
               liveNote="This gallery appears in the homepage portfolio section."
             />
             <p className="text-xs text-black/50">
-              Homepage order is set with move up/down on the galleries list.
+              Homepage order is set by dragging galleries on the galleries list.
             </p>
           </section>
         }
@@ -317,20 +375,31 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
                 </p>
                 <p className="text-xs text-black/50 mt-1">{presetHint('gallery')}</p>
               </div>
-              <ImageUploadButton
-                label={uploading ? 'Uploading...' : '+ Add image'}
-                onChange={uploadImage}
-                disabled={uploading}
-              />
+              <div className="flex flex-wrap gap-2">
+                <ImageUploadButton
+                  label={uploading ? 'Uploading...' : '+ Add image'}
+                  onChange={uploadImage}
+                  disabled={uploading}
+                />
+                <ImageUploadButton
+                  label={uploading ? 'Uploading...' : '+ Add multiple'}
+                  onChange={uploadImagesBulk}
+                  disabled={uploading}
+                  multiple
+                />
+              </div>
             </div>
 
             {images.length === 0 ? (
-              <p className="text-sm text-black/60">No images yet. Upload images to build this gallery.</p>
+              <p className="text-sm text-black/60">No images yet. Upload one or many images to build this gallery.</p>
             ) : null}
 
-            <div className="space-y-4">
-              {images.map((image, index) => (
-                <div key={image.id || `${image.image_url}-${index}`} className="border border-black/10 rounded-lg p-4">
+            <SortableList
+              items={images}
+              onReorder={setImages}
+              getItemKey={(image, index) => image.id || `${image.image_url}-${index}`}
+              renderItem={(image, index, { dragHandleProps }) => (
+                <div className="border border-black/10 rounded-lg p-4">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <img
                       src={image.thumbnail_url || image.image_url}
@@ -351,11 +420,8 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
                         placeholder="Caption / alt text"
                       />
                       <div className="flex flex-wrap gap-2">
-                        <ReorderButtons
-                          disableUp={index === 0}
-                          disableDown={index === images.length - 1}
-                          onMoveUp={() => moveImage(index, -1)}
-                          onMoveDown={() => moveImage(index, 1)}
+                        <ReorderControls
+                          dragHandleProps={dragHandleProps}
                           onRemove={() => removeImage(index)}
                         />
                         <button
@@ -369,8 +435,8 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            />
           </section>
         }
       />

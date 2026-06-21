@@ -84,8 +84,8 @@ export default function StudioHelpPage() {
         <section className="bg-white border border-black/10 rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-3">5. Tips</h3>
           <ul className="list-disc pl-5 space-y-2 text-black/80">
-            <li>The sticky save bar at the bottom follows you on long pages — use it on mobile too.</li>
-            <li>If you see &ldquo;Unsaved changes,&rdquo; save before leaving or your edits may be lost.</li>
+            <li>Drag blocks, FAQ items, paragraphs, and gallery images using the ⋮⋮ handle.</li>
+            <li>Edits auto-save after a few seconds of inactivity once you have a title.</li>
             <li>
               <strong>View on site</strong> opens the public page in a new tab (only when published).
             </li>

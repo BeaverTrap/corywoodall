@@ -1,6 +1,11 @@
 'use client';
 
-export default function ImageUploadButton({ label = 'Upload image', onChange, disabled = false }) {
+export default function ImageUploadButton({
+  label = 'Upload image',
+  onChange,
+  disabled = false,
+  multiple = false,
+}) {
   return (
     <label
       className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors ${
@@ -15,6 +20,7 @@ export default function ImageUploadButton({ label = 'Upload image', onChange, di
         accept="image/*"
         className="hidden"
         disabled={disabled}
+        multiple={multiple}
         onChange={onChange}
       />
     </label>

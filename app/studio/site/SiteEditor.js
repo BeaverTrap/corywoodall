@@ -9,9 +9,11 @@ import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
 import { presetHint } from '@/lib/uploads/presets';
 import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
 import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
-import ReorderButtons from '@/app/studio/components/ReorderButtons';
+import SortableList from '@/app/studio/components/SortableList';
+import ReorderControls from '@/app/studio/components/ReorderControls';
 import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
 import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
+import { useStudioAutoSave } from '@/app/studio/hooks/useStudioAutoSave';
 import {
   SiteHeroPreview,
   SiteAboutPreview,
@@ -60,9 +62,9 @@ export default function SiteEditor({ initialSections }) {
     setSavedSnapshot(snapshot);
   }, [initialSections]);
 
-  const saveAll = async () => {
+  const saveAll = async ({ auto = false } = {}) => {
     setSaving(true);
-    setMessage('');
+    if (!auto) setMessage('');
 
     const updates = [
       supabase.from('site_sections').upsert({
@@ -93,9 +95,19 @@ export default function SiteEditor({ initialSections }) {
     }
 
     setSavedSnapshot(currentSnapshot);
-    setMessage('Saved — your changes are live on the public site.');
+    setMessage(
+      auto
+        ? 'Auto-saved — your changes are live on the public site.'
+        : 'Saved — your changes are live on the public site.'
+    );
     setMessageTone('success');
   };
+
+  useStudioAutoSave({
+    enabled: !saving && !uploading,
+    isDirty,
+    onAutoSave: () => saveAll({ auto: true }),
+  });
 
   const uploadBackground = async (event) => {
     const file = event.target.files?.[0];
@@ -125,26 +137,6 @@ export default function SiteEditor({ initialSections }) {
       const paragraphs = [...prev.about.paragraphs];
       paragraphs[index] = value;
       return { ...prev, about: { ...prev.about, paragraphs } };
-    });
-  };
-
-  const moveParagraph = (index, direction) => {
-    const target = index + direction;
-    if (target < 0 || target >= home.about.paragraphs.length) return;
-    setHome((prev) => {
-      const paragraphs = [...prev.about.paragraphs];
-      [paragraphs[index], paragraphs[target]] = [paragraphs[target], paragraphs[index]];
-      return { ...prev, about: { ...prev.about, paragraphs } };
-    });
-  };
-
-  const moveFaqItem = (index, direction) => {
-    const target = index + direction;
-    if (target < 0 || target >= home.faq.items.length) return;
-    setHome((prev) => {
-      const items = [...prev.faq.items];
-      [items[index], items[target]] = [items[target], items[index]];
-      return { ...prev, faq: { ...prev.faq, items } };
     });
   };
 
@@ -249,31 +241,35 @@ export default function SiteEditor({ initialSections }) {
                 Add paragraph
               </button>
             </div>
-            {home.about.paragraphs.map((paragraph, index) => (
-              <div key={`about-${index}`} className="space-y-2">
-                <textarea
-                  rows={4}
-                  className="w-full border border-black/20 rounded px-3 py-2"
-                  value={paragraph}
-                  onChange={(e) => updateParagraph(index, e.target.value)}
-                />
-                <ReorderButtons
-                  disableUp={index === 0}
-                  disableDown={index === home.about.paragraphs.length - 1}
-                  onMoveUp={() => moveParagraph(index, -1)}
-                  onMoveDown={() => moveParagraph(index, 1)}
-                  onRemove={() =>
-                    setHome((prev) => ({
-                      ...prev,
-                      about: {
-                        paragraphs: prev.about.paragraphs.filter((_, i) => i !== index),
-                      },
-                    }))
-                  }
-                  removeLabel="Remove paragraph"
-                />
-              </div>
-            ))}
+            <SortableList
+              items={home.about.paragraphs}
+              onReorder={(paragraphs) =>
+                setHome((prev) => ({ ...prev, about: { ...prev.about, paragraphs } }))
+              }
+              getItemKey={(_, index) => `about-${index}`}
+              renderItem={(paragraph, index, { dragHandleProps }) => (
+                <div className="space-y-2">
+                  <textarea
+                    rows={4}
+                    className="w-full border border-black/20 rounded px-3 py-2"
+                    value={paragraph}
+                    onChange={(e) => updateParagraph(index, e.target.value)}
+                  />
+                  <ReorderControls
+                    dragHandleProps={dragHandleProps}
+                    onRemove={() =>
+                      setHome((prev) => ({
+                        ...prev,
+                        about: {
+                          paragraphs: prev.about.paragraphs.filter((_, i) => i !== index),
+                        },
+                      }))
+                    }
+                    removeLabel="Remove paragraph"
+                  />
+                </div>
+              )}
+            />
             <p className="text-xs text-black/50">
               You can use simple HTML in paragraphs, e.g. &lt;strong&gt;Cory Woodall&lt;/strong&gt; for bold.
             </p>
@@ -359,46 +355,48 @@ export default function SiteEditor({ initialSections }) {
               }
               placeholder="FAQ section title"
             />
-            {home.faq.items.map((item, index) => (
-              <div key={`faq-${index}`} className="border border-black/10 rounded p-4 space-y-3">
-                <input
-                  className="w-full border border-black/20 rounded px-3 py-2 font-medium"
-                  value={item.question}
-                  onChange={(e) => updateFaqItem(index, 'question', e.target.value)}
-                  placeholder="Question"
-                />
-                <textarea
-                  rows={4}
-                  className="w-full border border-black/20 rounded px-3 py-2"
-                  value={item.answer}
-                  onChange={(e) => updateFaqItem(index, 'answer', e.target.value)}
-                  placeholder="Answer"
-                />
-                <label className="inline-flex items-center gap-2 text-sm">
+            <SortableList
+              items={home.faq.items}
+              onReorder={(items) => setHome((prev) => ({ ...prev, faq: { ...prev.faq, items } }))}
+              getItemKey={(_, index) => `faq-${index}`}
+              renderItem={(item, index, { dragHandleProps }) => (
+                <div className="border border-black/10 rounded p-4 space-y-3">
                   <input
-                    type="checkbox"
-                    checked={Boolean(item.showArticlesLink)}
-                    onChange={(e) => updateFaqItem(index, 'showArticlesLink', e.target.checked)}
+                    className="w-full border border-black/20 rounded px-3 py-2 font-medium"
+                    value={item.question}
+                    onChange={(e) => updateFaqItem(index, 'question', e.target.value)}
+                    placeholder="Question"
                   />
-                  Show link to articles section
-                </label>
-                <ReorderButtons
-                  disableUp={index === 0}
-                  disableDown={index === home.faq.items.length - 1}
-                  onMoveUp={() => moveFaqItem(index, -1)}
-                  onMoveDown={() => moveFaqItem(index, 1)}
-                  onRemove={() =>
-                    setHome((prev) => ({
-                      ...prev,
-                      faq: {
-                        ...prev.faq,
-                        items: prev.faq.items.filter((_, i) => i !== index),
-                      },
-                    }))
-                  }
-                />
-              </div>
-            ))}
+                  <textarea
+                    rows={4}
+                    className="w-full border border-black/20 rounded px-3 py-2"
+                    value={item.answer}
+                    onChange={(e) => updateFaqItem(index, 'answer', e.target.value)}
+                    placeholder="Answer"
+                  />
+                  <label className="inline-flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(item.showArticlesLink)}
+                      onChange={(e) => updateFaqItem(index, 'showArticlesLink', e.target.checked)}
+                    />
+                    Show link to articles section
+                  </label>
+                  <ReorderControls
+                    dragHandleProps={dragHandleProps}
+                    onRemove={() =>
+                      setHome((prev) => ({
+                        ...prev,
+                        faq: {
+                          ...prev.faq,
+                          items: prev.faq.items.filter((_, i) => i !== index),
+                        },
+                      }))
+                    }
+                  />
+                </div>
+              )}
+            />
           </section>
         }
       />

@@ -19,19 +19,19 @@ export async function generateMetadata({ params }) {
   const ogImage = getArticleOgImage(article.blocks);
 
   return {
-    title: article.title,
-    description: article.excerpt,
+    title: article.meta_title || article.title,
+    description: article.meta_description || article.excerpt,
     openGraph: {
-      title: article.title,
-      description: article.excerpt,
+      title: article.meta_title || article.title,
+      description: article.meta_description || article.excerpt,
       url: `https://corywoodall.com/articles/${article.slug}`,
       type: 'article',
       ...(ogImage ? { images: [{ url: ogImage, alt: article.title }] } : {}),
     },
     twitter: {
       card: ogImage ? 'summary_large_image' : 'summary',
-      title: article.title,
-      description: article.excerpt,
+      title: article.meta_title || article.title,
+      description: article.meta_description || article.excerpt,
       ...(ogImage ? { images: [ogImage] } : {}),
     },
   };
