@@ -31,10 +31,10 @@ const emptySeries = {
 export default function GalleryEditor({ initialSeries = null, initialImages = [] }) {
   const router = useRouter();
   const supabase = createClient();
-  const isNew = !series.id;
 
   const [series, setSeries] = useState(initialSeries || emptySeries);
   const [images, setImages] = useState(initialImages);
+  const isNew = !series.id;
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');

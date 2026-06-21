@@ -1,4 +1,6 @@
-import { DragHandle } from '@/app/studio/components/SortableList';
+'use client';
+
+import DragHandle from '@/app/studio/components/DragHandle';
 
 export default function ReorderControls({ dragHandleProps, onRemove, removeLabel = 'Remove' }) {
   return (

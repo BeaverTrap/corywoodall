@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import SortableList, { DragHandle } from '@/app/studio/components/SortableList';
+import SortableList from '@/app/studio/components/SortableList';
+import DragHandle from '@/app/studio/components/DragHandle';
 
 export default function GallerySeriesList({ initialGalleries }) {
   const router = useRouter();
