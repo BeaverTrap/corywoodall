@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/content/queries';
+import { uploadStudioImage } from '@/lib/uploads/client';
 
 const BLOCK_TYPES = [
   { value: 'heading', label: 'Heading' },
@@ -88,16 +89,13 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   };
 
   const uploadForBlock = async (index, file, imageIndex = null) => {
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const path = `articles/${crypto.randomUUID()}.${extension}`;
-    const { error } = await supabase.storage.from('media').upload(path, file);
-    if (error) {
-      setMessage(error.message);
+    let publicUrl;
+    try {
+      publicUrl = await uploadStudioImage(file, 'articles');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Image upload failed.');
       return;
     }
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('media').getPublicUrl(path);
 
     const block = blocks[index];
     if (block.block_type === 'image') {

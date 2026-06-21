@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { defaultHomeContent, defaultArticlesIndexContent, defaultSiteMeta } from '@/lib/content/staticSite';
+import { uploadStudioImage } from '@/lib/uploads/client';
 
 function emptyFaqItem() {
   return { question: '', answer: '', showArticlesLink: false };
@@ -63,22 +64,16 @@ export default function SiteEditor({ initialSections }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const path = `site/${crypto.randomUUID()}.${extension}`;
-    const { error } = await supabase.storage.from('media').upload(path, file);
-    if (error) {
-      setMessage(error.message);
-      return;
+    try {
+      const publicUrl = await uploadStudioImage(file, 'site');
+
+      setHome((prev) => ({
+        ...prev,
+        hero: { ...prev.hero, backgroundImage: publicUrl },
+      }));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Image upload failed.');
     }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('media').getPublicUrl(path);
-
-    setHome((prev) => ({
-      ...prev,
-      hero: { ...prev.hero, backgroundImage: publicUrl },
-    }));
   };
 
   const updateParagraph = (index, value) => {

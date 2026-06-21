@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/content/queries';
+import { uploadStudioImage } from '@/lib/uploads/client';
 
 const emptySeries = {
   title: '',
@@ -112,30 +113,23 @@ export default function GalleryEditor({ initialSeries = null, initialImages = []
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const path = `galleries/${crypto.randomUUID()}.${extension}`;
+    try {
+      const publicUrl = await uploadStudioImage(file, 'galleries');
 
-    const { error } = await supabase.storage.from('media').upload(path, file);
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
+      setImages((prev) => [
+        ...prev,
+        {
+          image_url: publicUrl,
+          thumbnail_url: publicUrl,
+          alt_text: file.name.replace(/\.[^.]+$/, ''),
+        },
+      ]);
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('media').getPublicUrl(path);
-
-    setImages((prev) => [
-      ...prev,
-      {
-        image_url: publicUrl,
-        thumbnail_url: publicUrl,
-        alt_text: file.name.replace(/\.[^.]+$/, ''),
-      },
-    ]);
-
-    if (!series.cover_image_url) {
-      updateSeries('cover_image_url', publicUrl);
+      if (!series.cover_image_url) {
+        updateSeries('cover_image_url', publicUrl);
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Image upload failed.');
     }
   };
 
