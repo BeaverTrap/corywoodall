@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Navigation from '../components/Navigation';
+import SiteEditBar from '../components/SiteEditBar';
 
 export default function ArticlesLayout({ children }) {
   return (
@@ -24,6 +25,7 @@ export default function ArticlesLayout({ children }) {
             {children}
           </div>
         </div>
+        <SiteEditBar />
       </div>
     </div>
   );

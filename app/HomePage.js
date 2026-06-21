@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navigation from './components/Navigation';
+import SiteEditBar from './components/SiteEditBar';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
@@ -120,7 +121,7 @@ const Toolbar = ({ lightboxOpacity, setLightboxOpacity, lightboxDarkness, setLig
   );
 };
 
-export default function Home({ portfolioSections }) {
+export default function Home({ portfolioSections, siteContent }) {
   const aboutRef = useRef(null);
   const portfolioRef = useRef(null);
   const parallaxRef = useRef(null);
@@ -278,6 +279,26 @@ export default function Home({ portfolioSections }) {
     };
   }, []);
 
+  const { hero, about, contact, faq } = siteContent.home;
+
+  const renderAboutParagraph = (paragraph, index) => {
+    const className = 'text-sm sm:text-base md:text-lg leading-relaxed tracking-wide';
+    if (paragraph.includes('<')) {
+      return (
+        <p
+          key={`about-${index}`}
+          className={className}
+          dangerouslySetInnerHTML={{ __html: paragraph }}
+        />
+      );
+    }
+    return (
+      <p key={`about-${index}`} className={className}>
+        {paragraph}
+      </p>
+    );
+  };
+
   return (
     <>
       <style jsx global>{styles}</style>
@@ -287,7 +308,7 @@ export default function Home({ portfolioSections }) {
           <div className="parallax-bg absolute inset-0 w-full h-[200vh]">
             <div className="relative w-full h-full">
               <Image
-                src="/images/background_new.jpg"
+                src={hero.backgroundImage}
                 alt="Background"
                 fill
                 className="object-cover"
@@ -304,7 +325,7 @@ export default function Home({ portfolioSections }) {
         </div>
 
         {/* Content container */}
-        <div className="relative z-10">
+        <div className="relative z-10 pb-20">
           {/* Navigation */}
           <Navigation currentPage="home" activeSection={activeSection} />
 
@@ -312,14 +333,14 @@ export default function Home({ portfolioSections }) {
           <section className="relative min-h-screen w-full flex items-center justify-center">
             <div className="text-center px-4">
               <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 md:mb-16 tracking-[0.1em]">
-                CORY WOODALL
+                {hero.name}
               </h1>
               <div className="backdrop-blur-md bg-white/50 p-4 sm:p-6 md:p-8 rounded-lg max-w-2xl mx-auto">
                 <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black font-bold mb-4 md:mb-6 tracking-wider">
-                  Contemporary Cyanotypes
+                  {hero.subtitle}
                 </h2>
                 <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-black font-medium tracking-wide leading-relaxed">
-                  A revival of the historic cyanotype process, blending traditional UV exposure with contemporary themes and materials.
+                  {hero.tagline}
                 </p>
               </div>
             </div>
@@ -329,18 +350,7 @@ export default function Home({ portfolioSections }) {
           <section id="about" ref={aboutRef} className="min-h-screen flex items-center justify-center py-10 md:py-20">
             <div className="container mx-auto px-4 max-w-3xl backdrop-blur-md bg-white/50 p-4 sm:p-6 md:p-8 rounded-lg">
               <div className="space-y-4 md:space-y-8 text-black">
-                <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide">
-                  <strong className="font-black tracking-wider">Cory Woodall</strong> is an art historian, curator, and contemporary artist specializing in the historic cyanotype process. A graduate of the University of California, San Diego, she merges early photographic techniques with modern artistic perspectives to create evocative, nature-inspired works.
-                </p>
-                <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide">
-                  Drawing inspiration from early photography pioneers, Cory reinterprets the medium of cyanotype through the lens of modern botanical studies. Using hand-coated, light-sensitive paper, she arranges ethically sourced plant specimens to create luminous, organic compositions that highlight nature's intricate beauty.
-                </p>
-                <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide">
-                  Her work bridges science, history, and art, transforming delicate botanical forms into striking imagery. Each piece reflects a meticulous process of selection, arrangement, and exposure, resulting in a timeless fusion of historical craftsmanship and contemporary expression.
-                </p>
-                <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide">
-                  Cory currently lives and works in Flagstaff, Arizona, where she enables and incentivizes local artists. She has previously served as Assistant Curator at The San Diego Museum of Art and Curator of the Juneau-Douglas City Museum in Alaska.
-                </p>
+                {about.paragraphs.map(renderAboutParagraph)}
               </div>
             </div>
           </section>
@@ -439,9 +449,9 @@ export default function Home({ portfolioSections }) {
                 <div className="backdrop-blur-md bg-white/50 p-4 sm:p-8 md:p-12 rounded-lg">
                   <div className="space-y-4 md:space-y-8">
                     <div className="space-y-2 md:space-y-4">
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-black tracking-wide">Contact</h3>
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-black tracking-wide">{contact.heading}</h3>
                       <p className="text-sm sm:text-base md:text-lg text-black/80 leading-relaxed">
-                        Available for commissions, gallery exhibitions, and educational workshops.
+                        {contact.intro}
                       </p>
                     </div>
                     
@@ -449,24 +459,24 @@ export default function Home({ portfolioSections }) {
                       <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <span className="text-black/60 text-sm sm:text-base md:text-lg">Email:</span>
                         <a 
-                          href="mailto:woodallcory@gmail.com" 
+                          href={`mailto:${contact.email}`}
                           className="text-sm sm:text-base md:text-xl text-black hover:text-gray-700 transition-colors duration-300 font-medium break-all"
                         >
-                          woodallcory@gmail.com
+                          {contact.email}
                         </a>
                       </div>
                       
                       <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <span className="text-black/60 text-sm sm:text-base md:text-lg">Location:</span>
                         <span className="text-sm sm:text-base md:text-xl text-black font-medium">
-                          Flagstaff, Arizona
+                          {contact.location}
                         </span>
                       </div>
                     </div>
                     
                     <div className="pt-4 md:pt-6 border-t border-black/20">
                       <p className="text-xs sm:text-sm text-black/60">
-                        Please include details about your project or inquiry in your email.
+                        {contact.footerNote}
                       </p>
                     </div>
                   </div>
@@ -481,61 +491,28 @@ export default function Home({ portfolioSections }) {
           {/* FAQ section */}
           <section id="faq" ref={faqRef} className="min-h-screen flex items-center justify-center py-10 md:py-20">
             <div className="container mx-auto px-4 max-w-3xl backdrop-blur-md bg-white/50 p-4 sm:p-6 md:p-8 rounded-lg">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-center mb-6 md:mb-12 text-black tracking-[0.1em]">FAQ</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-center mb-6 md:mb-12 text-black tracking-[0.1em]">{faq.title}</h2>
               <div className="space-y-4 md:space-y-8 text-black">
-                                 <div className="faq-item">
-                   <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 0 ? null : 0)}>
-                     What is cyanotype art?
-                   </h3>
-                   <div className={`${openFaqIndex === 0 ? 'block' : 'hidden'}`}>
-                     <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide mb-4">
-                       The medium of cyanotype is a photographic one, created with a careful mixture of light sensitive chemicals coated onto a support surface and exposed to ultraviolet light, leaving behind areas of light and dark—shadows, essentially. This shadow-fixing process is the basis of all non-digital photography since its invention in 1839. The major difference between the numerous ways of making photographic prints is the materials involved that makes a surface light sensitive with the ability to capture and preserve impressions of light and shadow. Cyanotype emulsion (a liquid) uses a combination of water and chemicals that are available commercially today and can be applied to a variety of support surfaces, including paper, fabric, and ceramic.
-                     </p>
-                     <Link href="/articles" className="text-sm text-gray-600 hover:text-black transition-colors duration-300">
-                       Read more about cyanotype art in our articles section →
-                     </Link>
-                   </div>
-                 </div>
-                <div className="faq-item">
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 1 ? null : 1)}>
-                    How does cyanotype work?
-                  </h3>
-                  <p className={`text-sm sm:text-base md:text-lg leading-relaxed tracking-wide ${openFaqIndex === 1 ? 'block' : 'hidden'}`}>
-                    The cyanotype process involves exposing light-sensitive paper to a solution of ferric ammonium citrate (FAC) and potassium ferricyanide (K3Fe(CN)6). When light hits the paper, it creates a latent image. The paper is then immersed in a developer (usually a solution of ferrous ammonium sulfate) to reveal the blue print. Cory's work involves careful exposure to UV light and precise timing of the developer application.
-                  </p>
-                </div>
-                <div className="faq-item">
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 2 ? null : 2)}>
-                    What materials do you use for cyanotype?
-                  </h3>
-                  <p className={`text-sm sm:text-base md:text-lg leading-relaxed tracking-wide ${openFaqIndex === 2 ? 'block' : 'hidden'}`}>
-                    Cory uses a variety of light-sensitive papers, including cotton rag, watercolor, and specialty papers. She also works with natural materials like leaves, flowers, and plant specimens. The choice of paper and materials is crucial for achieving the desired results, as each has its own sensitivity and characteristics.
-                  </p>
-                </div>
-                <div className="faq-item">
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 3 ? null : 3)}>
-                    How long does a cyanotype print take to develop?
-                  </h3>
-                  <p className={`text-sm sm:text-base md:text-lg leading-relaxed tracking-wide ${openFaqIndex === 3 ? 'block' : 'hidden'}`}>
-                    The development time can vary greatly depending on the paper, exposure, and developer. A typical cyanotype print takes anywhere from 10 minutes to several hours to develop. Cory's prints often require multiple exposures and careful timing to achieve the desired effect.
-                  </p>
-                </div>
-                <div className="faq-item">
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 4 ? null : 4)}>
-                    Are cyanotype prints permanent?
-                  </h3>
-                  <p className={`text-sm sm:text-base md:text-lg leading-relaxed tracking-wide ${openFaqIndex === 4 ? 'block' : 'hidden'}`}>
-                    Cyanotype prints are indeed permanent. The blue image created on the paper is chemically bonded and will not fade or wash away. This makes them ideal for long-term preservation and exhibition.
-                  </p>
-                </div>
-                <div className="faq-item">
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer" onClick={() => setOpenFaqIndex(openFaqIndex === 5 ? null : 5)}>
-                    Can I make my own cyanotype prints?
-                  </h3>
-                  <p className={`text-sm sm:text-base md:text-lg leading-relaxed tracking-wide ${openFaqIndex === 5 ? 'block' : 'hidden'}`}>
-                    Yes, absolutely! Cory offers workshops and tutorials for beginners to learn the basics of cyanotype. The process is relatively simple and can be done with common household items. It's a great way to engage with the medium and create your own unique prints.
-                  </p>
-                </div>
+                {faq.items.map((item, index) => (
+                  <div key={item.question} className="faq-item">
+                    <h3
+                      className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer"
+                      onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                    >
+                      {item.question}
+                    </h3>
+                    <div className={openFaqIndex === index ? 'block' : 'hidden'}>
+                      <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide mb-4">
+                        {item.answer}
+                      </p>
+                      {item.showArticlesLink && (
+                        <Link href="/articles" className="text-sm text-gray-600 hover:text-black transition-colors duration-300">
+                          Read more about cyanotype art in our articles section →
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -593,6 +570,7 @@ export default function Home({ portfolioSections }) {
             }
           }}
         />
+        <SiteEditBar />
       </div>
     </>
   );

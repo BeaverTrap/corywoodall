@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { getPublishedArticles, estimateReadingTime, isSupabaseConfigured } from '@/lib/content/queries';
+import { getPublishedArticles, estimateReadingTime, isSupabaseConfigured, getSiteContent } from '@/lib/content/queries';
 
 const articlesDirectory = path.join(process.cwd(), 'app/articles');
 
@@ -75,10 +75,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function ArticlesIndex() {
   let articles = getStaticArticles();
+  let articlesIndex = {
+    title: 'ARTICLES',
+    subtitle: 'Insights into cyanotype art, historical processes, and contemporary applications',
+  };
 
   if (isSupabaseConfigured()) {
     try {
       const supabase = createClient();
+      const siteContent = await getSiteContent(supabase);
+      articlesIndex = siteContent.articles_index;
+
       const cmsArticles = await getPublishedArticles(supabase);
       const cmsMapped = await Promise.all(
         cmsArticles.map(async (article) => {
@@ -114,10 +121,10 @@ export default async function ArticlesIndex() {
     <>
       <div className="text-center mb-8 md:mb-16">
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-black mb-4 md:mb-8 tracking-[0.1em]">
-          ARTICLES
+          {articlesIndex.title}
         </h1>
         <p className="text-sm sm:text-base md:text-lg lg:text-xl text-black/80 tracking-wide max-w-2xl mx-auto px-4">
-          Insights into cyanotype art, historical processes, and contemporary applications
+          {articlesIndex.subtitle}
         </p>
       </div>
       <div className="space-y-6 md:space-y-8">

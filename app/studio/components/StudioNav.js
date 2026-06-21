@@ -10,6 +10,7 @@ export default function StudioNav({ email }) {
         </div>
         <nav className="flex flex-wrap items-center gap-4 text-sm">
           <Link href="/studio" className="hover:underline">Dashboard</Link>
+          <Link href="/studio/site" className="hover:underline">Site content</Link>
           <Link href="/studio/galleries" className="hover:underline">Galleries</Link>
           <Link href="/studio/articles" className="hover:underline">Articles</Link>
           <Link href="/" className="text-black/60 hover:underline">View site</Link>

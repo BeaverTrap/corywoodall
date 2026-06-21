@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import ImportPortfolioButton from './ImportPortfolioButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,8 @@ export default async function GalleriesPage() {
           New gallery
         </Link>
       </div>
+
+      <ImportPortfolioButton />
 
       <div className="space-y-3">
         {(galleries || []).map((gallery) => (
