@@ -241,16 +241,7 @@ export default function PatagoniaLakeResidency() {
             </a>
           </div>
           <div className="flex-1 text-right">
-            <a 
-              href="/articles/patagonia-lake-works" 
-              className="group flex items-center justify-end text-gray-600 hover:text-black transition-colors"
-            >
-              <div className="text-gray-400 group-hover:text-gray-600">→</div>
-              <div className="ml-4">
-                <div className="text-sm text-gray-500 group-hover:text-gray-700">Next Article</div>
-                <div className="font-medium group-hover:underline">Reflections on the Patagonia Lake Works</div>
-              </div>
-            </a>
+            <div className="text-sm text-gray-500">No next article yet</div>
           </div>
         </div>
       </div>
