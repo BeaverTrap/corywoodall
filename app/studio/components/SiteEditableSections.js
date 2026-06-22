@@ -20,7 +20,7 @@ export function SiteHeroEditable({ hero, onChange, onUploadBackground, uploading
         )}
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative z-10 text-center px-4 py-10 w-full max-w-2xl">
-          <div className="mb-4 [&_.rounded-lg]:border-white/20 [&_.bg-stone-50]:bg-white/10 [&_button]:text-white [&_button:hover]:bg-white/20 [&_.studio-rich-text]:text-white [&_.ProseMirror]:text-white">
+          <div className="mb-4 [&_.studio-toolbar]:bg-white/15 [&_.studio-toolbar-btn]:text-white [&_.studio-toolbar-btn:hover]:bg-white/20 [&_.studio-toolbar-btn-active]:bg-white/25 [&_.studio-toolbar-btn-active]:text-white [&_.studio-rich-text]:text-white [&_.ProseMirror]:text-white">
             <RichTextarea
               rows={1}
               variant="hero-title"
@@ -268,7 +268,7 @@ export function SiteSeoEditable({ siteMeta, onChange }) {
   const update = (field, value) => onChange({ ...siteMeta, [field]: value });
 
   return (
-    <div className="bg-black text-white p-6 min-h-[140px] flex flex-col justify-center space-y-3">
+    <div className="bg-black text-white p-6 min-h-[140px] flex flex-col justify-center space-y-3 [&_.studio-toolbar]:bg-white/10 [&_.studio-toolbar-btn]:text-white [&_.studio-toolbar-btn:hover]:bg-white/15 [&_.studio-toolbar-btn-active]:bg-white/20 [&_.studio-rich-text]:text-white [&_.ProseMirror]:text-white">
       <p className="text-white/60 text-xs">Search / browser tab</p>
       <RichTextarea
         rows={1}

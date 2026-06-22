@@ -129,6 +129,7 @@ export function ArticleBlockEditable({
             value={block.content?.body || ''}
             onChange={(body) => onUpdate(index, { ...block.content, body })}
             placeholder="Write your article text"
+            hint="Tip: draft in Google Docs, then paste here — formatting adapts to your site layout."
           />
         </div>
       );

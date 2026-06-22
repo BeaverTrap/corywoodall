@@ -287,10 +287,11 @@ export default function Home({ portfolioSections, siteContent }) {
     const className = 'text-sm sm:text-base md:text-lg leading-relaxed tracking-wide';
     if (paragraph.includes('<')) {
       return (
-        <p
+        <CmsRichText
           key={`about-${index}`}
-          className={`${className} cms-rich-text`}
-          dangerouslySetInnerHTML={{ __html: paragraph }}
+          as="div"
+          className={className}
+          value={paragraph}
         />
       );
     }

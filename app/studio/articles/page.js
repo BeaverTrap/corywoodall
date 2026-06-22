@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { stripHtmlToText } from '@/lib/studio/richTextContent';
 import ImportArticlesButton from './ImportArticlesButton';
-
 export const dynamic = 'force-dynamic';
 
 export default async function ArticlesPage() {
@@ -36,7 +36,7 @@ export default async function ArticlesPage() {
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <Link href={`/studio/articles/${article.id}`} className="flex-1 min-w-[200px] hover:underline">
-                <p className="font-semibold">{article.title}</p>
+                <p className="font-semibold">{stripHtmlToText(article.title)}</p>
                 <p className="text-sm text-black/60">/articles/{article.slug}</p>
               </Link>
               <div className="flex flex-wrap items-center gap-3">

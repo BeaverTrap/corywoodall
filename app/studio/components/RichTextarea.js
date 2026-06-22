@@ -13,6 +13,7 @@ export default function RichTextarea({
   toolbar = 'full',
   bordered = true,
   singleLine = false,
+  toolbarReveal,
 }) {
   return (
     <RichTextEditor
@@ -25,6 +26,7 @@ export default function RichTextarea({
       toolbar={toolbar}
       bordered={bordered}
       singleLine={singleLine}
+      toolbarReveal={toolbarReveal}
     />
   );
 }

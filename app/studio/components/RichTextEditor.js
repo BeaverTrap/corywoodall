@@ -1,30 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Placeholder from '@tiptap/extension-placeholder';
+import { BubbleMenu } from '@tiptap/react/menus';
+import { MdOpenInNew, MdEdit, MdLinkOff } from 'react-icons/md';
+import { normalizePastedHtml } from '@/lib/studio/pasteCleanup';
 import { normalizeEditorHtml, toEditorContent } from '@/lib/studio/richTextContent';
+import { createRichTextExtensions } from '@/lib/studio/richTextExtensions';
 import { RICH_TEXT_VARIANTS } from '@/lib/studio/richTextVariants';
-
-function ToolbarButton({ active, onClick, title, children, className = '' }) {
-  return (
-    <button
-      type="button"
-      title={title}
-      aria-label={title}
-      aria-pressed={active}
-      className={`min-w-[2rem] px-2 py-1 text-sm rounded transition-colors ${
-        active ? 'bg-black text-white' : 'hover:bg-black/10'
-      } ${className}`}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-}
+import RichTextToolbar, { RichTextBubbleToolbar } from '@/app/studio/components/RichTextToolbar';
 
 function normalizeSingleLine(editor, html) {
   const normalized = normalizeEditorHtml(html);
@@ -49,54 +33,74 @@ export default function RichTextEditor({
   toolbar = 'full',
   bordered = true,
   singleLine = false,
+  toolbarReveal = bordered ? 'always' : 'focus',
 }) {
-  const minHeight = singleLine ? 40 : minRows * 26;
+  const minHeight = singleLine ? 44 : minRows * 28;
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const openLinkRef = useRef(() => {});
   const variantClass = RICH_TEXT_VARIANTS[variant] || RICH_TEXT_VARIANTS.default;
-  const showLists = toolbar === 'full' && !singleLine;
-  const showLink = toolbar === 'full' || toolbar === 'inline';
+  const effectiveToolbar = singleLine && toolbar === 'full' ? 'inline' : toolbar;
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: false,
-        bulletList: showLists,
-        orderedList: showLists,
-        blockquote: showLists,
-        hardBreak: !singleLine,
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'underline',
-        },
-      }),
-      Placeholder.configure({ placeholder }),
-    ],
-    content: toEditorContent(value),
-    immediatelyRender: false,
-    onUpdate: ({ editor: activeEditor }) => {
-      let html = activeEditor.getHTML();
-      if (singleLine) {
-        html = normalizeSingleLine(activeEditor, html);
-      }
-      onChange(normalizeEditorHtml(html));
-    },
-    editorProps: {
-      attributes: {
-        class: `${variantClass} focus:outline-none px-1 py-1`,
-        style: `min-height: ${minHeight}px`,
-      },
-      handleKeyDown: (_view, event) => {
-        if (singleLine && event.key === 'Enter') {
-          event.preventDefault();
-          return true;
+  const extensions = useMemo(
+    () => createRichTextExtensions({ placeholder, toolbar: effectiveToolbar, singleLine }),
+    [placeholder, effectiveToolbar, singleLine]
+  );
+
+  const editor = useEditor(
+    {
+      extensions,
+      content: toEditorContent(value),
+      immediatelyRender: false,
+      onUpdate: ({ editor: activeEditor }) => {
+        let html = activeEditor.getHTML();
+        if (singleLine) {
+          html = normalizeSingleLine(activeEditor, html);
         }
-        return false;
+        onChange(normalizeEditorHtml(html));
+      },
+      editorProps: {
+        attributes: {
+          class: `${variantClass} studio-editor-prose focus:outline-none`,
+          style: `min-height: ${minHeight}px`,
+        },
+        handleKeyDown: (_view, event) => {
+          if (singleLine && event.key === 'Enter') {
+            event.preventDefault();
+            return true;
+          }
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+            event.preventDefault();
+            openLinkRef.current();
+            return true;
+          }
+          return false;
+        },
+        transformPastedHTML: (html) => normalizePastedHtml(html, { singleLine }),
       },
     },
-  });
+    [extensions, minHeight, singleLine, variantClass]
+  );
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const onFocus = () => setIsFocused(true);
+    const onBlur = () => {
+      if (!showLinkInput) {
+        setIsFocused(false);
+      }
+    };
+
+    editor.on('focus', onFocus);
+    editor.on('blur', onBlur);
+
+    return () => {
+      editor.off('focus', onFocus);
+      editor.off('blur', onBlur);
+    };
+  }, [editor, showLinkInput]);
 
   useEffect(() => {
     if (!editor) return;
@@ -111,11 +115,13 @@ export default function RichTextEditor({
 
   const openLinkEditor = () => {
     if (!editor) return;
-
     const previousUrl = editor.getAttributes('link').href || '';
     setLinkUrl(previousUrl);
     setShowLinkInput(true);
+    setIsFocused(true);
   };
+
+  openLinkRef.current = openLinkEditor;
 
   const applyLink = () => {
     if (!editor) return;
@@ -124,7 +130,8 @@ export default function RichTextEditor({
     if (!url) {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
     } else {
-      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+      const href = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      editor.chain().focus().extendMarkRange('link').setLink({ href }).run();
     }
 
     setShowLinkInput(false);
@@ -141,120 +148,117 @@ export default function RichTextEditor({
   if (!editor) {
     return (
       <div
-        className={`${bordered ? 'rounded-lg border border-black/20 bg-white' : ''} animate-pulse`}
-        style={{ minHeight }}
-      />
+        className={`studio-editor ${bordered ? 'studio-editor-bordered' : 'studio-editor-embedded'}`}
+        style={{ minHeight: minHeight + (effectiveToolbar !== 'none' ? 48 : 0) }}
+      >
+        <div className="studio-editor-surface animate-pulse" style={{ minHeight }} />
+      </div>
     );
   }
 
-  const toolbarEl = (
-    <div
-      className={`flex flex-wrap items-center gap-1 px-1 py-1 ${
-        bordered ? 'border-b border-black/10 bg-stone-50' : 'bg-black/5 rounded mb-1'
-      }`}
-      role="toolbar"
-      aria-label="Text formatting"
-    >
-      <ToolbarButton
-        title="Bold"
-        active={editor.isActive('bold')}
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className="font-bold"
-      >
-        B
-      </ToolbarButton>
-      <ToolbarButton
-        title="Italic"
-        active={editor.isActive('italic')}
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className="italic"
-      >
-        I
-      </ToolbarButton>
-      {showLink ? (
-        <ToolbarButton title="Link" active={editor.isActive('link')} onClick={openLinkEditor}>
-          Link
-        </ToolbarButton>
-      ) : null}
-      {showLists ? (
-        <>
-          <span className="w-px h-5 bg-black/15 mx-1" aria-hidden="true" />
-          <ToolbarButton
-            title="Bullet list"
-            active={editor.isActive('bulletList')}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-          >
-            • List
-          </ToolbarButton>
-          <ToolbarButton
-            title="Numbered list"
-            active={editor.isActive('orderedList')}
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          >
-            1. List
-          </ToolbarButton>
-          <ToolbarButton
-            title="Quote"
-            active={editor.isActive('blockquote')}
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          >
-            “
-          </ToolbarButton>
-        </>
-      ) : null}
-    </div>
-  );
+  const showBubble = effectiveToolbar === 'full' && !singleLine;
+  const showToolbar =
+    effectiveToolbar !== 'none' &&
+    (toolbarReveal === 'always' || isFocused || showLinkInput);
+  const editorClassName = [
+    'studio-editor',
+    bordered ? 'studio-editor-bordered' : 'studio-editor-embedded',
+    isFocused ? 'studio-editor-focused' : '',
+    toolbarReveal === 'focus' && !showToolbar && effectiveToolbar !== 'none'
+      ? 'studio-editor-toolbar-hidden'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <div className={bordered ? 'rounded-lg border border-black/20 overflow-hidden bg-white' : ''}>
-      {toolbar !== 'none' ? toolbarEl : null}
+    <div className={editorClassName}>
+      {showToolbar ? (
+        <RichTextToolbar
+          editor={editor}
+          mode={effectiveToolbar}
+          showLinkInput={showLinkInput}
+          linkUrl={linkUrl}
+          onLinkUrlChange={setLinkUrl}
+          onOpenLink={openLinkEditor}
+          onApplyLink={applyLink}
+          onRemoveLink={removeLink}
+          onCloseLink={() => {
+            setShowLinkInput(false);
+            setLinkUrl('');
+          }}
+        />
+      ) : null}
 
-      {showLinkInput ? (
-        <div
-          className={`flex flex-wrap items-center gap-2 px-2 py-2 ${
-            bordered ? 'border-b border-black/10 bg-stone-50' : 'bg-black/5 rounded mb-1'
-          }`}
-        >
-          <input
-            type="url"
-            value={linkUrl}
-            onChange={(event) => setLinkUrl(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                applyLink();
-              }
-              if (event.key === 'Escape') {
-                setShowLinkInput(false);
-              }
+      {showBubble ? (
+        <>
+          <BubbleMenu
+            editor={editor}
+            shouldShow={({ editor: activeEditor, state }) => {
+              const { empty } = state.selection;
+              return !empty && !activeEditor.isActive('link');
             }}
-            placeholder="https://example.com"
-            className="flex-1 min-w-[200px] border border-black/20 rounded px-2 py-1 text-sm"
-            autoFocus
-          />
-          <button
-            type="button"
-            className="px-3 py-1 text-sm rounded bg-black text-white"
-            onClick={applyLink}
+            tippyOptions={{ duration: 120, placement: 'top' }}
+            className="studio-bubble-menu"
           >
-            Apply
-          </button>
-          <button
-            type="button"
-            className="px-3 py-1 text-sm rounded border border-black/20"
-            onClick={removeLink}
+            <RichTextBubbleToolbar editor={editor} onOpenLink={openLinkEditor} />
+          </BubbleMenu>
+
+          <BubbleMenu
+            editor={editor}
+            shouldShow={({ editor: activeEditor }) => activeEditor.isActive('link')}
+            tippyOptions={{ duration: 120, placement: 'bottom' }}
+            className="studio-bubble-menu"
           >
-            Remove
-          </button>
-        </div>
+            <div className="studio-link-bubble">
+              <a
+                href={editor.getAttributes('link').href || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="studio-link-bubble-url"
+              >
+                {editor.getAttributes('link').href || 'Link'}
+              </a>
+              <button
+                type="button"
+                className="studio-toolbar-btn"
+                title="Open link"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  const href = editor.getAttributes('link').href;
+                  if (href) window.open(href, '_blank', 'noopener,noreferrer');
+                }}
+              >
+                <MdOpenInNew className="studio-toolbar-icon" />
+              </button>
+              <button
+                type="button"
+                className="studio-toolbar-btn"
+                title="Edit link"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={openLinkEditor}
+              >
+                <MdEdit className="studio-toolbar-icon" />
+              </button>
+              <button
+                type="button"
+                className="studio-toolbar-btn"
+                title="Remove link"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={removeLink}
+              >
+                <MdLinkOff className="studio-toolbar-icon" />
+              </button>
+            </div>
+          </BubbleMenu>
+        </>
       ) : null}
 
-      <EditorContent editor={editor} />
-      {hint ? (
-        <p className={`text-xs text-black/50 py-1 ${bordered ? 'px-3 border-t border-black/5' : ''}`}>
-          {hint}
-        </p>
-      ) : null}
+      <div className="studio-editor-surface">
+        <EditorContent editor={editor} />
+      </div>
+
+      {hint ? <p className="studio-editor-hint">{hint}</p> : null}
     </div>
   );
 }

@@ -25,15 +25,19 @@ export default function StudioHelpPage() {
         </section>
 
         <section className="bg-white border border-black/10 rounded-lg p-6">
-          <h3 className="text-xl font-semibold mb-3">2. Edit site text</h3>
-          <p className="text-black/80 leading-relaxed">
+          <h3 className="text-xl font-semibold mb-3">2. Edit site content</h3>
+          <p className="text-black/80 leading-relaxed mb-3">
             <Link href="/studio/site" className="underline">
               Site content
             </Link>{' '}
             covers the homepage hero, about paragraphs, contact info, FAQ, articles index intro, and
-            browser tab title. Each section shows a live preview beside the editor. Click{' '}
-            <strong>Save all changes</strong> at the bottom when you&apos;re done — changes go live
-            immediately.
+            browser tab title. Click directly in each section to edit — what you see is what visitors
+            get.
+          </p>
+          <p className="text-black/80 leading-relaxed">
+            Changes <strong>auto-save after a short pause</strong>, or use{' '}
+            <strong>Save all changes</strong> at the bottom. Either way, saved content goes live on the
+            public site immediately.
           </p>
         </section>
 
@@ -47,13 +51,13 @@ export default function StudioHelpPage() {
               </Link>
               .
             </li>
-            <li>Upload images inside the gallery editor, add captions, and reorder with move up/down.</li>
+            <li>Upload images inside the gallery editor, add captions, and drag to reorder.</li>
             <li>
               Turn on <strong>Published on homepage</strong> when the gallery should appear on the
               public site. Draft galleries stay hidden.
             </li>
             <li>
-              Set homepage order with move up/down on the{' '}
+              Set homepage order by dragging galleries on the{' '}
               <Link href="/studio/galleries" className="underline">
                 galleries list
               </Link>
@@ -77,17 +81,30 @@ export default function StudioHelpPage() {
               Check <strong>Published</strong> when the article should appear at{' '}
               <strong>/articles/your-slug</strong>.
             </li>
-            <li>Use <strong>Duplicate</strong> on an existing article to start a new residency post from a template.</li>
+            <li>
+              Use <strong>Duplicate</strong> on an existing article to start a new residency post from
+              a template.
+            </li>
+            <li>Articles auto-save while you edit, same as site content and galleries.</li>
           </ul>
         </section>
 
         <section className="bg-white border border-black/10 rounded-lg p-6">
-          <h3 className="text-xl font-semibold mb-3">5. Tips</h3>
+          <h3 className="text-xl font-semibold mb-3">5. Formatting &amp; writing tips</h3>
           <ul className="list-disc pl-5 space-y-2 text-black/80">
             <li>
-              Rich text fields show formatting as you type — bold, italic, links, lists, and quotes.
+              Use the toolbar for bold, italic, underline, links, lists, headings, alignment, and
+              quotes. Select text for a quick formatting bar, or press <strong>Ctrl+K</strong> to add a
+              link.
             </li>
-            <li>Drag blocks, FAQ items, paragraphs, and gallery images using the ⋮⋮ handle.</li>
+            <li>
+              <strong>Paste from Google Docs or Word:</strong> write in a doc, copy, and paste into any
+              text block. Bold, lists, headings, and links come through; fonts and colors are replaced
+              with your site&apos;s styling automatically.
+            </li>
+            <li>
+              Drag blocks, FAQ items, about paragraphs, and gallery images using the ⋮⋮ handle.
+            </li>
             <li>
               <strong>View on site</strong> opens the public page in a new tab (only when published).
             </li>

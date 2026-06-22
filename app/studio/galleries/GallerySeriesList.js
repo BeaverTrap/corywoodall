@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { stripHtmlToText } from '@/lib/studio/richTextContent';
 import SortableList from '@/app/studio/components/SortableList';
 import DragHandle from '@/app/studio/components/DragHandle';
 
@@ -44,7 +45,7 @@ export default function GallerySeriesList({ initialGalleries }) {
             <div className="flex items-start gap-3 min-w-0 flex-1">
               <DragHandle dragHandleProps={dragHandleProps} />
               <Link href={`/studio/galleries/${gallery.id}`} className="min-w-[200px] hover:underline">
-                <p className="font-semibold">{gallery.title}</p>
+                <p className="font-semibold">{stripHtmlToText(gallery.title)}</p>
                 <p className="text-sm text-black/60">/{gallery.slug}</p>
               </Link>
             </div>
