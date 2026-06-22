@@ -214,7 +214,7 @@ export default function SiteEditor({ initialSections }) {
           <SiteArticlesIndexEditable articlesIndex={articlesIndex} onChange={setArticlesIndex} />
         </WysiwygSection>
 
-        <WysiwygSection label="Site SEO">
+        <WysiwygSection label="SEO — how you appear in Google">
           <SiteSeoEditable siteMeta={siteMeta} onChange={setSiteMeta} />
         </WysiwygSection>
 

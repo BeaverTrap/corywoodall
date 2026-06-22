@@ -111,6 +111,33 @@ export default function StudioHelpPage() {
             <li>While signed in, a black bar at the bottom of the public site links back to Studio.</li>
           </ul>
         </section>
+        <section className="bg-white border border-black/10 rounded-lg p-6">
+          <h3 className="text-xl font-semibold mb-3">6. SEO — search results</h3>
+          <div className="text-black/80 leading-relaxed space-y-3">
+            <p>
+              <strong>SEO</strong> (search engine optimization) controls how your pages look in Google —
+              not the page itself, but the <strong>title</strong> and <strong>description</strong> people
+              see before they click.
+            </p>
+            <p>For example, a Google result might look like:</p>
+            <div className="rounded-lg border border-black/10 bg-stone-50 px-4 py-3 text-sm">
+              <p className="text-[#1a0dab] text-lg leading-snug">Cory Woodall — Cyanotype Artist</p>
+              <p className="text-[#006621] text-xs mb-1">https://corywoodall.com</p>
+              <p className="text-black/70">
+                Contemporary cyanotype prints and artist residencies. Portfolio, articles, and contact.
+              </p>
+            </div>
+            <p>
+              The blue line is your <strong>SEO title</strong>. The gray sentence is your{' '}
+              <strong>SEO description</strong>. Edit these under{' '}
+              <Link href="/studio/site" className="underline">
+                Site content
+              </Link>{' '}
+              (homepage) or in each article&apos;s page settings. If you leave them blank, the site uses
+              your normal title and intro text.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );

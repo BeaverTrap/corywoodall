@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
 import RichTextarea from '@/app/studio/components/RichTextarea';
+import SeoExplainer from '@/app/studio/components/SeoExplainer';
 import SortableList from '@/app/studio/components/SortableList';
 import ReorderControls from '@/app/studio/components/ReorderControls';
 import { presetHint } from '@/lib/uploads/presets';
@@ -268,27 +269,31 @@ export function SiteSeoEditable({ siteMeta, onChange }) {
   const update = (field, value) => onChange({ ...siteMeta, [field]: value });
 
   return (
-    <div className="bg-black text-white p-6 min-h-[140px] flex flex-col justify-center space-y-3 [&_.studio-toolbar]:bg-white/10 [&_.studio-toolbar-btn]:text-white [&_.studio-toolbar-btn:hover]:bg-white/15 [&_.studio-toolbar-btn-active]:bg-white/20 [&_.studio-rich-text]:text-white [&_.ProseMirror]:text-white">
-      <p className="text-white/60 text-xs">Search / browser tab</p>
-      <RichTextarea
-        rows={1}
-        variant="compact"
-        toolbar="minimal"
-        singleLine
-        bordered={false}
-        value={siteMeta.title}
-        onChange={(value) => update('title', value)}
-        placeholder="Browser tab title"
-      />
-      <RichTextarea
-        rows={2}
-        variant="compact"
-        toolbar="inline"
-        bordered={false}
-        value={siteMeta.description}
-        onChange={(value) => update('description', value)}
-        placeholder="Meta description"
-      />
+    <div className="bg-black text-white p-6 min-h-[140px] flex flex-col justify-center space-y-4 [&_.studio-toolbar]:bg-white/10 [&_.studio-toolbar-btn]:text-white [&_.studio-toolbar-btn:hover]:bg-white/15 [&_.studio-toolbar-btn-active]:bg-white/20 [&_.studio-rich-text]:text-white [&_.ProseMirror]:text-white">
+      <SeoExplainer variant="dark" context="site" />
+      <div className="space-y-3">
+        <p className="text-white/60 text-xs">Homepage search title</p>
+        <RichTextarea
+          rows={1}
+          variant="compact"
+          toolbar="minimal"
+          singleLine
+          bordered={false}
+          value={siteMeta.title}
+          onChange={(value) => update('title', value)}
+          placeholder="e.g. Cory Woodall — Cyanotype Artist"
+        />
+        <p className="text-white/60 text-xs">Homepage search description</p>
+        <RichTextarea
+          rows={2}
+          variant="compact"
+          toolbar="inline"
+          bordered={false}
+          value={siteMeta.description}
+          onChange={(value) => update('description', value)}
+          placeholder="A short summary of your site for Google (1–2 sentences)"
+        />
+      </div>
     </div>
   );
 }

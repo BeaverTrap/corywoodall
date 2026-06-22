@@ -7,8 +7,21 @@ import ImageGridWithCaptions from '@/app/components/ImageGridWithCaptions';
 import ImageWithCaption from '@/app/components/ImageWithCaption';
 import PublishedToggle from '@/app/studio/components/PublishedToggle';
 import StudioMetaFields, { StudioMetaInput } from '@/app/studio/components/StudioMetaFields';
+import SeoExplainer from '@/app/studio/components/SeoExplainer';
 import { slugify } from '@/lib/content/queries';
 import { stripHtmlToText } from '@/lib/studio/richTextContent';
+
+function ImageBlockField({ label, hint, children }) {
+  return (
+    <div className="space-y-1">
+      <div>
+        <p className="text-xs font-medium text-black/70">{label}</p>
+        {hint ? <p className="text-xs text-black/45 mt-0.5">{hint}</p> : null}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export function ArticleHeaderEditable({ article, onChange, isNew }) {
   const update = (field, value) => {
@@ -43,6 +56,7 @@ export function ArticleHeaderEditable({ article, onChange, isNew }) {
         />
       </div>
       <StudioMetaFields>
+        <SeoExplainer context="article" />
         <StudioMetaInput
           label="URL slug"
           value={article.slug}
@@ -50,13 +64,16 @@ export function ArticleHeaderEditable({ article, onChange, isNew }) {
           hint="/articles/your-slug"
         />
         <StudioMetaInput
-          label="Meta title (optional)"
+          label="SEO title (optional)"
           value={article.meta_title || ''}
           onChange={(value) => update('meta_title', value)}
           placeholder="Defaults to article title"
+          hint="Shown as the headline in Google search results."
         />
         <div>
-          <label className="block text-xs font-medium text-black/60 mb-1">Meta description (optional)</label>
+          <label className="block text-xs font-medium text-black/60 mb-1">
+            SEO description (optional)
+          </label>
           <RichTextarea
             rows={2}
             variant="compact"
@@ -66,6 +83,7 @@ export function ArticleHeaderEditable({ article, onChange, isNew }) {
             onChange={(value) => update('meta_description', value)}
             placeholder="Defaults to excerpt"
           />
+          <p className="text-xs text-black/45 mt-1">Shown as the gray text under your link in Google.</p>
         </div>
         <PublishedToggle
           published={article.published}
@@ -140,8 +158,8 @@ export function ArticleBlockEditable({
           {block.content?.src ? (
             <ImageWithCaption
               src={block.content.src}
-              alt={block.content.alt || ''}
-              caption={block.content.caption || block.content.alt || ''}
+              alt={stripHtmlToText(block.content.alt || '')}
+              caption={block.content.caption || ''}
             />
           ) : (
             <div className="border border-dashed border-black/20 rounded-lg p-8 text-center text-sm text-black/50">
@@ -155,26 +173,42 @@ export function ArticleBlockEditable({
               disabled={uploading}
             />
           </div>
-          <RichTextarea
-            rows={1}
-            variant="compact"
-            toolbar="minimal"
-            singleLine
-            bordered
-            value={block.content?.alt || ''}
-            onChange={(alt) => onUpdate(index, { ...block.content, alt })}
-            placeholder="Alt text"
-          />
-          <RichTextarea
-            rows={1}
-            variant="compact"
-            toolbar="inline"
-            singleLine
-            bordered
-            value={block.content?.caption || ''}
-            onChange={(caption) => onUpdate(index, { ...block.content, caption })}
-            placeholder="Optional figure caption"
-          />
+          <ImageBlockField
+            label="Caption"
+            hint="Shown in italics under the image on the published article. Leave blank for no caption."
+          >
+            <RichTextarea
+              rows={1}
+              variant="compact"
+              toolbar="inline"
+              singleLine
+              bordered
+              value={block.content?.caption || ''}
+              onChange={(caption) => {
+                const content = { ...block.content, caption };
+                if (!stripHtmlToText(block.content?.alt || '') && stripHtmlToText(caption)) {
+                  content.alt = caption;
+                }
+                onUpdate(index, content);
+              }}
+              placeholder="e.g. Evening Primrose cyanotype photogram"
+            />
+          </ImageBlockField>
+          <ImageBlockField
+            label="Alt text (accessibility)"
+            hint="Describes the image for screen readers. Not shown on the page. Often the same as your caption."
+          >
+            <RichTextarea
+              rows={1}
+              variant="compact"
+              toolbar="minimal"
+              singleLine
+              bordered
+              value={block.content?.alt || ''}
+              onChange={(alt) => onUpdate(index, { ...block.content, alt })}
+              placeholder="Short description of what is in the image"
+            />
+          </ImageBlockField>
         </div>
       );
     case 'image_grid':
@@ -220,20 +254,25 @@ export function ArticleBlockEditable({
                   }
                   disabled={uploading}
                 />
-                <RichTextarea
-                  rows={1}
-                  variant="compact"
-                  toolbar="minimal"
-                  singleLine
-                  bordered
-                  value={image.alt || ''}
-                  onChange={(alt) => {
-                    const images = [...(block.content.images || [])];
-                    images[imageIndex] = { ...images[imageIndex], alt };
-                    onUpdate(index, { ...block.content, images });
-                  }}
-                  placeholder="Alt text"
-                />
+                <ImageBlockField
+                  label={`Image ${imageIndex + 1} — alt text`}
+                  hint="For screen readers only. Not shown on the page."
+                >
+                  <RichTextarea
+                    rows={1}
+                    variant="compact"
+                    toolbar="minimal"
+                    singleLine
+                    bordered
+                    value={image.alt || ''}
+                    onChange={(alt) => {
+                      const images = [...(block.content.images || [])];
+                      images[imageIndex] = { ...images[imageIndex], alt };
+                      onUpdate(index, { ...block.content, images });
+                    }}
+                    placeholder="Describe this image"
+                  />
+                </ImageBlockField>
               </div>
             ))}
           </div>
@@ -249,16 +288,21 @@ export function ArticleBlockEditable({
           >
             + Add image slot
           </button>
-          <RichTextarea
-            rows={1}
-            variant="compact"
-            toolbar="inline"
-            singleLine
-            bordered
-            value={block.content?.caption || ''}
-            onChange={(caption) => onUpdate(index, { ...block.content, caption })}
-            placeholder="Grid caption"
-          />
+          <ImageBlockField
+            label="Grid caption"
+            hint="Optional caption shown under the whole image grid."
+          >
+            <RichTextarea
+              rows={1}
+              variant="compact"
+              toolbar="inline"
+              singleLine
+              bordered
+              value={block.content?.caption || ''}
+              onChange={(caption) => onUpdate(index, { ...block.content, caption })}
+              placeholder="Caption for the full grid"
+            />
+          </ImageBlockField>
         </div>
       );
     default:

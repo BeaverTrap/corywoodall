@@ -43,7 +43,7 @@ export default function ArticleBlockPreview({ block }) {
           <ImageWithCaption
             src={block.content.src}
             alt={block.content.alt || ''}
-            caption={block.content.caption || block.content.alt || ''}
+            caption={block.content.caption || ''}
           />
         </div>
       ) : (
