@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { defaultHomeContent, defaultArticlesIndexContent, defaultSiteMeta } from '@/lib/content/staticSite';
 import { uploadStudioImage } from '@/lib/uploads/client';
 import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
+import RichTextarea from '@/app/studio/components/RichTextarea';
 import { presetHint } from '@/lib/uploads/presets';
 import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
 import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
@@ -249,11 +250,10 @@ export default function SiteEditor({ initialSections }) {
               getItemKey={(_, index) => `about-${index}`}
               renderItem={(paragraph, index, { dragHandleProps }) => (
                 <div className="space-y-2">
-                  <textarea
+                  <RichTextarea
                     rows={4}
-                    className="w-full border border-black/20 rounded px-3 py-2"
                     value={paragraph}
-                    onChange={(e) => updateParagraph(index, e.target.value)}
+                    onChange={(value) => updateParagraph(index, value)}
                   />
                   <ReorderControls
                     dragHandleProps={dragHandleProps}
@@ -271,7 +271,7 @@ export default function SiteEditor({ initialSections }) {
               )}
             />
             <p className="text-xs text-black/50">
-              You can use simple HTML in paragraphs, e.g. &lt;strong&gt;Cory Woodall&lt;/strong&gt; for bold.
+              Use the formatting bar for bold, italic, and links.
             </p>
           </section>
         }
@@ -367,11 +367,10 @@ export default function SiteEditor({ initialSections }) {
                     onChange={(e) => updateFaqItem(index, 'question', e.target.value)}
                     placeholder="Question"
                   />
-                  <textarea
+                  <RichTextarea
                     rows={4}
-                    className="w-full border border-black/20 rounded px-3 py-2"
                     value={item.answer}
-                    onChange={(e) => updateFaqItem(index, 'answer', e.target.value)}
+                    onChange={(value) => updateFaqItem(index, 'answer', value)}
                     placeholder="Answer"
                   />
                   <label className="inline-flex items-center gap-2 text-sm">

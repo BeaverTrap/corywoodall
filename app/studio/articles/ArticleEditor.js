@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/content/queries';
 import { uploadStudioImage } from '@/lib/uploads/client';
 import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
+import RichTextarea from '@/app/studio/components/RichTextarea';
 import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
 import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
 import SortableList from '@/app/studio/components/SortableList';
@@ -339,11 +340,10 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
         );
       case 'text':
         return (
-          <textarea
+          <RichTextarea
             rows={6}
-            className="w-full border border-black/20 rounded px-3 py-2"
             value={block.content.body || ''}
-            onChange={(e) => updateBlock(index, { ...block.content, body: e.target.value })}
+            onChange={(body) => updateBlock(index, { ...block.content, body })}
           />
         );
       case 'image':

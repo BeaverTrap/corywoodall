@@ -288,7 +288,7 @@ export default function Home({ portfolioSections, siteContent }) {
       return (
         <p
           key={`about-${index}`}
-          className={className}
+          className={`${className} cms-rich-text`}
           dangerouslySetInnerHTML={{ __html: paragraph }}
         />
       );
@@ -505,9 +505,16 @@ export default function Home({ portfolioSections, siteContent }) {
                       {item.question}
                     </h3>
                     <div className={openFaqIndex === index ? 'block' : 'hidden'}>
-                      <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide mb-4">
-                        {item.answer}
-                      </p>
+                      {item.answer?.includes('<') ? (
+                        <div
+                          className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide mb-4 cms-rich-text"
+                          dangerouslySetInnerHTML={{ __html: item.answer }}
+                        />
+                      ) : (
+                        <p className="text-sm sm:text-base md:text-lg leading-relaxed tracking-wide mb-4">
+                          {item.answer}
+                        </p>
+                      )}
                       {item.showArticlesLink && (
                         <Link href="/articles" className="text-sm text-gray-600 hover:text-black transition-colors duration-300">
                           Read more about cyanotype art in our articles section →

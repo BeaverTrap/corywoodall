@@ -51,4 +51,56 @@
   body {
     font-family: var(--daisyui-font-family-base);
   }
+
+  /* Studio TipTap editor + CMS HTML on public site */
+  .studio-rich-text p,
+  .cms-rich-text p {
+    margin: 0.5em 0;
+  }
+
+  .studio-rich-text p:first-child,
+  .cms-rich-text p:first-child {
+    margin-top: 0;
+  }
+
+  .studio-rich-text p:last-child,
+  .cms-rich-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .studio-rich-text ul,
+  .cms-rich-text ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    margin: 0.5em 0;
+  }
+
+  .studio-rich-text ol,
+  .cms-rich-text ol {
+    list-style: decimal;
+    padding-left: 1.25rem;
+    margin: 0.5em 0;
+  }
+
+  .studio-rich-text blockquote,
+  .cms-rich-text blockquote {
+    border-left: 3px solid rgba(0, 0, 0, 0.2);
+    padding-left: 0.75rem;
+    margin: 0.75em 0;
+    color: rgba(0, 0, 0, 0.75);
+    font-style: italic;
+  }
+
+  .studio-rich-text a,
+  .cms-rich-text a {
+    text-decoration: underline;
+  }
+
+  .studio-rich-text p.is-editor-empty:first-child::before {
+    color: rgba(0, 0, 0, 0.4);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
   

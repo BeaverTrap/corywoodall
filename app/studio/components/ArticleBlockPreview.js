@@ -25,12 +25,18 @@ export default function ArticleBlockPreview({ block }) {
         </div>
       );
     }
-    case 'text':
+    case 'text': {
+      const body = block.content?.body || '';
       return (
-        <div className="p-4 h-full">
-          <p className="text-sm leading-relaxed whitespace-pre-line">{block.content?.body}</p>
+        <div className="p-4 h-full cms-rich-text text-sm leading-relaxed">
+          {body.includes('<') ? (
+            <div dangerouslySetInnerHTML={{ __html: body }} />
+          ) : (
+            <p className="whitespace-pre-line">{body}</p>
+          )}
         </div>
       );
+    }
     case 'image':
       return block.content?.src ? (
         <div className="p-4">

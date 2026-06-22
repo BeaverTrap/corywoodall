@@ -8,7 +8,7 @@ function renderAboutParagraph(paragraph, index) {
     return (
       <p
         key={`about-${index}`}
-        className={className}
+        className={`${className} cms-rich-text`}
         dangerouslySetInnerHTML={{ __html: paragraph }}
       />
     );
@@ -79,7 +79,14 @@ export function SiteFaqPreview({ faq }) {
           {(faq.items || []).map((item, index) => (
             <div key={`faq-${index}`} className="border-b border-black/10 pb-3 last:border-0">
               <p className="font-semibold text-sm mb-1">{item.question || 'Question'}</p>
-              <p className="text-sm text-black/80">{item.answer}</p>
+              {item.answer?.includes('<') ? (
+                <div
+                  className="text-sm text-black/80 cms-rich-text"
+                  dangerouslySetInnerHTML={{ __html: item.answer }}
+                />
+              ) : (
+                <p className="text-sm text-black/80">{item.answer}</p>
+              )}
             </div>
           ))}
         </div>

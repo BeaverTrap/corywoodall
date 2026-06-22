@@ -3,7 +3,7 @@ import ImageGridWithCaptions from './ImageGridWithCaptions';
 
 function renderTextBlock(block) {
   const body = block.content?.body || '';
-  const className = 'text-lg leading-relaxed tracking-wide whitespace-pre-line';
+  const className = 'cms-rich-text text-lg leading-relaxed tracking-wide';
 
   if (body.includes('<')) {
     return (
@@ -16,7 +16,7 @@ function renderTextBlock(block) {
   }
 
   return (
-    <p key={block.id} className={className}>
+    <p key={block.id} className={`${className} whitespace-pre-line`}>
       {body}
     </p>
   );
