@@ -6,18 +6,19 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { slugify } from '@/lib/content/queries';
 import { uploadStudioImage } from '@/lib/uploads/client';
-import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
-import RichTextarea from '@/app/studio/components/RichTextarea';
 import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
-import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
+import WysiwygSection from '@/app/studio/components/WysiwygSection';
 import SortableList from '@/app/studio/components/SortableList';
 import ReorderControls from '@/app/studio/components/ReorderControls';
 import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
-import PublishedToggle from '@/app/studio/components/PublishedToggle';
 import DeleteConfirmButton from '@/app/studio/components/DeleteConfirmButton';
 import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
 import { useStudioAutoSave } from '@/app/studio/hooks/useStudioAutoSave';
-import ArticleBlockPreview, { ArticleHeaderPreview } from '@/app/studio/components/ArticleBlockPreview';
+import { hasRichTextContent, stripHtmlToText } from '@/lib/studio/richTextContent';
+import {
+  ArticleHeaderEditable,
+  ArticleBlockEditable,
+} from '@/app/studio/components/ArticleEditableSections';
 
 const BLOCK_TYPES = [
   { value: 'heading', label: 'Heading' },
@@ -72,16 +73,6 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   }, [initialArticle, initialBlocks]);
 
   const viewHref = article.published && article.slug ? `/articles/${article.slug}` : null;
-
-  const updateArticle = (field, value) => {
-    setArticle((prev) => {
-      const next = { ...prev, [field]: value };
-      if (field === 'title' && (isNew || !prev.slug)) {
-        next.slug = slugify(value);
-      }
-      return next;
-    });
-  };
 
   const addBlock = (type) => {
     setBlocks((prev) => [
@@ -148,7 +139,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   };
 
   const saveArticle = async ({ auto = false } = {}) => {
-    if (!article.title?.trim()) return;
+    if (!hasRichTextContent(article.title)) return;
 
     setSaving(true);
     if (!auto) setMessage('');
@@ -161,8 +152,8 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
       title: article.title,
       slug: article.slug,
       excerpt: article.excerpt,
-      meta_title: article.meta_title?.trim() || null,
-      meta_description: article.meta_description?.trim() || null,
+      meta_title: stripHtmlToText(article.meta_title)?.trim() || null,
+      meta_description: stripHtmlToText(article.meta_description)?.trim() || null,
       published: Boolean(article.published),
       published_at: publishedAt,
       updated_at: new Date().toISOString(),
@@ -244,7 +235,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   };
 
   useStudioAutoSave({
-    enabled: Boolean(article.title?.trim()) && !saving && !uploading,
+    enabled: hasRichTextContent(article.title) && !saving && !uploading,
     isDirty,
     onAutoSave: () => saveArticle({ auto: true }),
   });
@@ -252,7 +243,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
   const duplicateArticle = async () => {
     if (isNew || !article.id) return;
 
-    if (!window.confirm(`Create a draft copy of "${article.title}"?`)) return;
+    if (!window.confirm(`Create a draft copy of "${stripHtmlToText(article.title)}"?`)) return;
 
     setSaving(true);
     setMessage('');
@@ -261,7 +252,7 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
     const { data: copy, error: articleError } = await supabase
       .from('articles')
       .insert({
-        title: `${article.title} (copy)`,
+        title: `${stripHtmlToText(article.title)} (copy)`,
         slug: copySlug,
         excerpt: article.excerpt,
         meta_title: article.meta_title,
@@ -317,124 +308,10 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
     router.refresh();
   };
 
-  const renderBlockEditor = (block, index) => {
-    switch (block.block_type) {
-      case 'heading':
-        return (
-          <>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={block.content.text || ''}
-              onChange={(e) => updateBlock(index, { ...block.content, text: e.target.value })}
-              placeholder="Heading text"
-            />
-            <select
-              className="border border-black/20 rounded px-3 py-2"
-              value={block.content.level || 2}
-              onChange={(e) => updateBlock(index, { ...block.content, level: Number(e.target.value) })}
-            >
-              <option value={2}>H2</option>
-              <option value={3}>H3</option>
-            </select>
-          </>
-        );
-      case 'text':
-        return (
-          <RichTextarea
-            rows={6}
-            value={block.content.body || ''}
-            onChange={(body) => updateBlock(index, { ...block.content, body })}
-          />
-        );
-      case 'image':
-        return (
-          <div className="space-y-3">
-            {block.content.src ? (
-              <img src={block.content.src} alt={block.content.alt || ''} className="max-h-48 rounded" />
-            ) : null}
-            <ImageUploadButton
-              label={uploading ? 'Uploading...' : 'Upload image'}
-              onChange={(e) => e.target.files?.[0] && uploadForBlock(index, e.target.files[0])}
-              disabled={uploading}
-            />
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={block.content.alt || ''}
-              onChange={(e) => updateBlock(index, { ...block.content, alt: e.target.value })}
-              placeholder="Alt text / caption"
-            />
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={block.content.caption || ''}
-              onChange={(e) => updateBlock(index, { ...block.content, caption: e.target.value })}
-              placeholder="Optional figure caption"
-            />
-          </div>
-        );
-      case 'image_grid':
-        return (
-          <div className="space-y-3">
-            <select
-              className="border border-black/20 rounded px-3 py-2"
-              value={block.content.cols || 3}
-              onChange={(e) => updateBlock(index, { ...block.content, cols: Number(e.target.value) })}
-            >
-              <option value={2}>2 columns</option>
-              <option value={3}>3 columns</option>
-              <option value={4}>4 columns</option>
-            </select>
-            {(block.content.images || []).map((image, imageIndex) => (
-              <div key={`${image.src}-${imageIndex}`} className="border border-black/10 rounded p-3 space-y-2">
-                {image.src ? <img src={image.src} alt={image.alt || ''} className="max-h-32 rounded" /> : null}
-                <ImageUploadButton
-                  label={uploading ? 'Uploading...' : 'Upload image'}
-                  onChange={(e) =>
-                    e.target.files?.[0] && uploadForBlock(index, e.target.files[0], imageIndex)
-                  }
-                  disabled={uploading}
-                />
-                <input
-                  className="w-full border border-black/20 rounded px-3 py-2"
-                  value={image.alt || ''}
-                  onChange={(e) => {
-                    const images = [...block.content.images];
-                    images[imageIndex] = { ...images[imageIndex], alt: e.target.value };
-                    updateBlock(index, { ...block.content, images });
-                  }}
-                  placeholder="Alt text"
-                />
-              </div>
-            ))}
-            <button
-              type="button"
-              className="px-3 py-1 border rounded text-sm"
-              onClick={() =>
-                updateBlock(index, {
-                  ...block.content,
-                  images: [...(block.content.images || []), { src: '', alt: '' }],
-                })
-              }
-            >
-              Add image slot
-            </button>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={block.content.caption || ''}
-              onChange={(e) => updateBlock(index, { ...block.content, caption: e.target.value })}
-              placeholder="Grid caption"
-            />
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <>
-    <StudioEditorShell
-      header={
-        <>
+      <StudioEditorShell
+        header={
           <div>
             <Link href="/studio/articles" className="text-sm text-black/60 hover:underline">
               ← Back to articles
@@ -442,79 +319,16 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
             <h2 className="text-3xl font-bold mt-2">{isNew ? 'New article' : 'Edit article'}</h2>
             {isDirty ? <p className="text-sm text-amber-700 mt-2">Unsaved changes</p> : null}
           </div>
-        </>
-      }
-    >
-      <EditorPreviewRow
-        label="Article header preview"
-        preview={<ArticleHeaderPreview article={article} />}
-        editor={
-          <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
-            <div>
-              <label className="block text-sm font-medium mb-1">Title</label>
-              <input
-                className="w-full border border-black/20 rounded px-3 py-2"
-                value={article.title}
-                onChange={(e) => updateArticle('title', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">URL slug</label>
-              <input
-                className="w-full border border-black/20 rounded px-3 py-2"
-                value={article.slug}
-                onChange={(e) => updateArticle('slug', slugify(e.target.value))}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Excerpt</label>
-              <textarea
-                rows={3}
-                className="w-full border border-black/20 rounded px-3 py-2"
-                value={article.excerpt}
-                onChange={(e) => updateArticle('excerpt', e.target.value)}
-              />
-            </div>
-            <div className="border-t border-black/10 pt-4 space-y-4">
-              <h4 className="text-sm font-semibold">SEO (optional)</h4>
-              <div>
-                <label className="block text-sm font-medium mb-1">Meta title</label>
-                <input
-                  className="w-full border border-black/20 rounded px-3 py-2"
-                  value={article.meta_title || ''}
-                  onChange={(e) => updateArticle('meta_title', e.target.value)}
-                  placeholder={article.title || 'Defaults to article title'}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Meta description</label>
-                <textarea
-                  rows={2}
-                  className="w-full border border-black/20 rounded px-3 py-2"
-                  value={article.meta_description || ''}
-                  onChange={(e) => updateArticle('meta_description', e.target.value)}
-                  placeholder={article.excerpt || 'Defaults to excerpt'}
-                />
-              </div>
-            </div>
-            <PublishedToggle
-              published={article.published}
-              onChange={(value) => updateArticle('published', value)}
-              checkboxLabel="Published"
-              draftNote="This article is hidden. Visitors cannot open it at /articles/your-slug."
-              liveNote="This article is public at /articles/your-slug."
-            />
-          </section>
         }
-      />
+      >
+        <WysiwygSection label="Article header">
+          <ArticleHeaderEditable article={article} onChange={setArticle} isNew={isNew} />
+        </WysiwygSection>
 
-      <div className="bg-white border border-black/10 rounded-lg p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-xl font-semibold">Content blocks</h3>
-            <p className="text-sm text-black/60 mt-1">
-              Drag blocks to reorder. Add a <strong>Single image</strong> or <strong>Image grid</strong> block, then use Upload image inside it.
-            </p>
+            <h3 className="text-lg font-semibold">Content blocks</h3>
+            <p className="text-sm text-black/60 mt-1">Drag blocks to reorder. Edit directly in the preview below.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {BLOCK_TYPES.map((type) => (
@@ -535,75 +349,70 @@ export default function ArticleEditor({ initialArticle = null, initialBlocks = [
             No content yet. Use the buttons above to add text, headings, or image blocks.
           </p>
         ) : null}
-      </div>
 
-      <SortableList
-        items={blocks}
-        onReorder={setBlocks}
-        getItemKey={(block, index) => block.id || `block-${index}`}
-        className="space-y-6"
-        renderItem={(block, index, { dragHandleProps }) => (
-          <EditorPreviewRow
-            label={`${block.block_type.replace('_', ' ')} preview`}
-            preview={<ArticleBlockPreview block={block} />}
-            editor={
-              <div className="border border-black/10 rounded-lg p-4 space-y-3 h-full bg-white">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium capitalize">{block.block_type.replace('_', ' ')}</p>
-                  <ReorderControls
-                    dragHandleProps={dragHandleProps}
-                    onRemove={() => removeBlock(index)}
-                  />
-                </div>
-                {renderBlockEditor(block, index)}
-              </div>
-            }
-          />
-        )}
+        <SortableList
+          items={blocks}
+          onReorder={setBlocks}
+          getItemKey={(block, index) => block.id || `block-${index}`}
+          className="space-y-6"
+          renderItem={(block, index, { dragHandleProps }) => (
+            <WysiwygSection label={block.block_type.replace('_', ' ')}>
+              <ArticleBlockEditable
+                block={block}
+                index={index}
+                uploading={uploading}
+                onUpdate={updateBlock}
+                onUpload={uploadForBlock}
+                renderControls={
+                  <ReorderControls dragHandleProps={dragHandleProps} onRemove={() => removeBlock(index)} />
+                }
+              />
+            </WysiwygSection>
+          )}
+        />
+
+        {!isNew ? (
+          <section className="bg-white border border-black/10 rounded-lg p-6 space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Duplicate article</h3>
+              <p className="text-sm text-black/70 mb-4">
+                Start a new draft with the same content blocks — useful for a new residency post.
+              </p>
+              <button
+                type="button"
+                onClick={duplicateArticle}
+                disabled={saving}
+                className="px-4 py-2 rounded-lg border border-black/20 text-sm font-medium hover:bg-black/5 disabled:opacity-50"
+              >
+                Duplicate as draft
+              </button>
+            </div>
+
+            <div className="border-t border-red-200 pt-6">
+              <h3 className="text-lg font-semibold text-red-900 mb-2">Delete article</h3>
+              <p className="text-sm text-black/70 mb-4">
+                Permanently remove &ldquo;{stripHtmlToText(article.title)}&rdquo; and all of its content blocks.
+              </p>
+              <DeleteConfirmButton
+                label="Delete article"
+                confirmMessage={`Delete "${stripHtmlToText(article.title)}"? This cannot be undone.`}
+                onConfirm={deleteArticle}
+                disabled={saving}
+              />
+            </div>
+          </section>
+        ) : null}
+      </StudioEditorShell>
+      <StudioSaveBar
+        saveLabel="Save article"
+        onSave={saveArticle}
+        saving={saving}
+        disabled={!hasRichTextContent(article.title)}
+        viewHref={viewHref}
+        viewLabel="View on site"
+        message={message}
+        messageTone={messageTone}
       />
-
-      {!isNew ? (
-        <section className="bg-white border border-black/10 rounded-lg p-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Duplicate article</h3>
-            <p className="text-sm text-black/70 mb-4">
-              Start a new draft with the same content blocks — useful for a new residency post.
-            </p>
-            <button
-              type="button"
-              onClick={duplicateArticle}
-              disabled={saving}
-              className="px-4 py-2 rounded-lg border border-black/20 text-sm font-medium hover:bg-black/5 disabled:opacity-50"
-            >
-              Duplicate as draft
-            </button>
-          </div>
-
-          <div className="border-t border-red-200 pt-6">
-            <h3 className="text-lg font-semibold text-red-900 mb-2">Delete article</h3>
-            <p className="text-sm text-black/70 mb-4">
-              Permanently remove &ldquo;{article.title}&rdquo; and all of its content blocks.
-            </p>
-            <DeleteConfirmButton
-              label="Delete article"
-              confirmMessage={`Delete "${article.title}"? This cannot be undone.`}
-              onConfirm={deleteArticle}
-              disabled={saving}
-            />
-          </div>
-        </section>
-      ) : null}
-    </StudioEditorShell>
-    <StudioSaveBar
-      saveLabel="Save article"
-      onSave={saveArticle}
-      saving={saving}
-      disabled={!article.title}
-      viewHref={viewHref}
-      viewLabel="View on site"
-      message={message}
-      messageTone={messageTone}
-    />
     </>
   );
 }

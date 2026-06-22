@@ -4,9 +4,10 @@ import { FaTwitter, FaFacebook, FaEnvelope } from 'react-icons/fa';
 import { createClient } from '@/lib/supabase/server';
 import { getArticleBySlug, getAdjacentArticles, estimateReadingTime, isSupabaseConfigured } from '@/lib/content/queries';
 import { getArticleOgImage } from '@/lib/content/articleOgImage';
+import { stripHtmlToText } from '@/lib/studio/richTextContent';
 import ArticleContent from '@/app/components/ArticleContent';
 import ArticleNavigation from '@/app/components/ArticleNavigation';
-
+import { CmsRichText } from '@/app/components/CmsRichText';
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
@@ -17,21 +18,24 @@ export async function generateMetadata({ params }) {
   if (!article) return {};
 
   const ogImage = getArticleOgImage(article.blocks);
+  const metaTitle = stripHtmlToText(article.meta_title || article.title);
+  const metaDescription = stripHtmlToText(article.meta_description || article.excerpt);
+  const plainTitle = stripHtmlToText(article.title);
 
   return {
-    title: article.meta_title || article.title,
-    description: article.meta_description || article.excerpt,
+    title: metaTitle,
+    description: metaDescription,
     openGraph: {
-      title: article.meta_title || article.title,
-      description: article.meta_description || article.excerpt,
+      title: metaTitle,
+      description: metaDescription,
       url: `https://corywoodall.com/articles/${article.slug}`,
       type: 'article',
-      ...(ogImage ? { images: [{ url: ogImage, alt: article.title }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage, alt: plainTitle }] } : {}),
     },
     twitter: {
       card: ogImage ? 'summary_large_image' : 'summary',
-      title: article.meta_title || article.title,
-      description: article.meta_description || article.excerpt,
+      title: metaTitle,
+      description: metaDescription,
       ...(ogImage ? { images: [ogImage] } : {}),
     },
   };
@@ -47,15 +51,17 @@ export default async function CmsArticlePage({ params }) {
   const readingTime = estimateReadingTime(article.blocks);
   const { previous, next } = await getAdjacentArticles(supabase, params.slug);
   const pageUrl = `https://corywoodall.com/articles/${article.slug}`;
-  const shareText = encodeURIComponent(article.title);
+  const shareText = encodeURIComponent(stripHtmlToText(article.title));
 
   return (
     <div className="py-8">
       <div className="mb-2">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-0 text-left leading-tight">
-            {article.title}
-          </h1>
+          <CmsRichText
+            as="h1"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-0 text-left leading-tight"
+            value={article.title}
+          />
           <div className="text-sm text-black/60 text-right">
             <span>
               {article.published_at

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Navigation from './components/Navigation';
 import SiteEditBar from './components/SiteEditBar';
 import ContactForm from './components/ContactForm';
+import { CmsRichText } from './components/CmsRichText';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
@@ -333,16 +334,22 @@ export default function Home({ portfolioSections, siteContent }) {
           {/* Hero section */}
           <section className="relative min-h-screen w-full flex items-center justify-center">
             <div className="text-center px-4">
-              <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 md:mb-16 tracking-[0.1em]">
-                {hero.name}
-              </h1>
+              <CmsRichText
+                as="h1"
+                className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 md:mb-16 tracking-[0.1em]"
+                value={hero.name}
+              />
               <div className="backdrop-blur-md bg-white/50 p-4 sm:p-6 md:p-8 rounded-lg max-w-2xl mx-auto">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black font-bold mb-4 md:mb-6 tracking-wider">
-                  {hero.subtitle}
-                </h2>
-                <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-black font-medium tracking-wide leading-relaxed">
-                  {hero.tagline}
-                </p>
+                <CmsRichText
+                  as="h2"
+                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black font-bold mb-4 md:mb-6 tracking-wider"
+                  value={hero.subtitle}
+                />
+                <CmsRichText
+                  as="p"
+                  className="text-sm sm:text-base md:text-xl lg:text-2xl text-black font-medium tracking-wide leading-relaxed"
+                  value={hero.tagline}
+                />
               </div>
             </div>
           </section>
@@ -391,34 +398,44 @@ export default function Home({ portfolioSections, siteContent }) {
                         
                         {/* Description */}
                         <div className="w-full md:w-2/3">
-                          <h3 className="text-3xl font-bold text-black tracking-wider mb-4">
-                            {section.title}
-                          </h3>
+                          <CmsRichText
+                            as="h3"
+                            className="text-3xl font-bold text-black tracking-wider mb-4"
+                            value={section.title}
+                          />
                           <div className="backdrop-blur-md bg-white/80 p-6 rounded-lg border border-white/20 shadow-lg">
-                            <p className="text-lg text-gray-800 leading-relaxed mb-4">
-                              {section.description.split('\n\n')[0]}
-                            </p>
-                            
-                            {/* Individual image links */}
-                            {section.description.split('\n\n').length > 1 && (
-                              <div className="mt-4">
-                                <p className="text-sm text-gray-600 mb-2">Works in this series:</p>
-                                <div className="space-y-1">
-                                  {section.description.split('\n\n')[1].split('\n').map((work, workIndex) => (
-                                    <button
-                                      key={workIndex}
-                                      onClick={() => {
-                                        setSelectedGallery(section);
-                                        setPhotoIndex(workIndex);
-                                        setIsLightboxOpen(true);
-                                      }}
-                                      className="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200 text-left"
-                                    >
-                                      {work}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
+                            {section.description.includes('<') ? (
+                              <CmsRichText
+                                as="div"
+                                className="text-lg text-gray-800 leading-relaxed mb-4"
+                                value={section.description}
+                              />
+                            ) : (
+                              <>
+                                <p className="text-lg text-gray-800 leading-relaxed mb-4">
+                                  {section.description.split('\n\n')[0]}
+                                </p>
+                                {section.description.split('\n\n').length > 1 && (
+                                  <div className="mt-4">
+                                    <p className="text-sm text-gray-600 mb-2">Works in this series:</p>
+                                    <div className="space-y-1">
+                                      {section.description.split('\n\n')[1].split('\n').map((work, workIndex) => (
+                                        <button
+                                          key={workIndex}
+                                          onClick={() => {
+                                            setSelectedGallery(section);
+                                            setPhotoIndex(workIndex);
+                                            setIsLightboxOpen(true);
+                                          }}
+                                          className="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200 text-left"
+                                        >
+                                          {work}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </>
                             )}
                             
                             <button 
@@ -450,10 +467,16 @@ export default function Home({ portfolioSections, siteContent }) {
                 <div className="backdrop-blur-md bg-white/50 p-4 sm:p-8 md:p-12 rounded-lg">
                   <div className="space-y-4 md:space-y-8">
                     <div className="space-y-2 md:space-y-4">
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-black tracking-wide">{contact.heading}</h3>
-                      <p className="text-sm sm:text-base md:text-lg text-black/80 leading-relaxed">
-                        {contact.intro}
-                      </p>
+                      <CmsRichText
+                        as="h3"
+                        className="text-xl sm:text-2xl md:text-3xl font-bold text-black tracking-wide"
+                        value={contact.heading}
+                      />
+                      <CmsRichText
+                        as="p"
+                        className="text-sm sm:text-base md:text-lg text-black/80 leading-relaxed"
+                        value={contact.intro}
+                      />
                     </div>
                     
                     <div className="space-y-4 md:space-y-6">
@@ -476,9 +499,11 @@ export default function Home({ portfolioSections, siteContent }) {
                     </div>
                     
                     <div className="pt-4 md:pt-6 border-t border-black/20">
-                      <p className="text-xs sm:text-sm text-black/60">
-                        {contact.footerNote}
-                      </p>
+                      <CmsRichText
+                        as="p"
+                        className="text-xs sm:text-sm text-black/60"
+                        value={contact.footerNote}
+                      />
                     </div>
 
                     <ContactForm />
@@ -494,16 +519,20 @@ export default function Home({ portfolioSections, siteContent }) {
           {/* FAQ section */}
           <section id="faq" ref={faqRef} className="min-h-screen flex items-center justify-center py-10 md:py-20">
             <div className="container mx-auto px-4 max-w-3xl backdrop-blur-md bg-white/50 p-4 sm:p-6 md:p-8 rounded-lg">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-center mb-6 md:mb-12 text-black tracking-[0.1em]">{faq.title}</h2>
+              <CmsRichText
+                as="h2"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-center mb-6 md:mb-12 text-black tracking-[0.1em]"
+                value={faq.title}
+              />
               <div className="space-y-4 md:space-y-8 text-black">
                 {faq.items.map((item, index) => (
                   <div key={item.question} className="faq-item">
-                    <h3
+                    <CmsRichText
+                      as="h3"
                       className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-2 md:mb-4 cursor-pointer"
+                      value={item.question}
                       onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                    >
-                      {item.question}
-                    </h3>
+                    />
                     <div className={openFaqIndex === index ? 'block' : 'hidden'}>
                       {item.answer?.includes('<') ? (
                         <div

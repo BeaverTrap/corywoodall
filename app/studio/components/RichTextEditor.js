@@ -6,6 +6,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import { normalizeEditorHtml, toEditorContent } from '@/lib/studio/richTextContent';
+import { RICH_TEXT_VARIANTS } from '@/lib/studio/richTextVariants';
 
 function ToolbarButton({ active, onClick, title, children, className = '' }) {
   return (
@@ -25,21 +26,45 @@ function ToolbarButton({ active, onClick, title, children, className = '' }) {
   );
 }
 
+function normalizeSingleLine(editor, html) {
+  const normalized = normalizeEditorHtml(html);
+  if (!normalized) return '';
+
+  const json = editor.getJSON();
+  if (json.content && json.content.length > 1) {
+    editor.commands.setContent({ type: 'doc', content: [json.content[0]] }, { emitUpdate: false });
+    return normalizeEditorHtml(editor.getHTML());
+  }
+
+  return normalized;
+}
+
 export default function RichTextEditor({
   value,
   onChange,
   minRows = 6,
   placeholder = 'Write here…',
   hint,
+  variant = 'default',
+  toolbar = 'full',
+  bordered = true,
+  singleLine = false,
 }) {
-  const minHeight = minRows * 26;
+  const minHeight = singleLine ? 40 : minRows * 26;
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const variantClass = RICH_TEXT_VARIANTS[variant] || RICH_TEXT_VARIANTS.default;
+  const showLists = toolbar === 'full' && !singleLine;
+  const showLink = toolbar === 'full' || toolbar === 'inline';
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: false,
+        bulletList: showLists,
+        orderedList: showLists,
+        blockquote: showLists,
+        hardBreak: !singleLine,
       }),
       Link.configure({
         openOnClick: false,
@@ -52,12 +77,23 @@ export default function RichTextEditor({
     content: toEditorContent(value),
     immediatelyRender: false,
     onUpdate: ({ editor: activeEditor }) => {
-      onChange(normalizeEditorHtml(activeEditor.getHTML()));
+      let html = activeEditor.getHTML();
+      if (singleLine) {
+        html = normalizeSingleLine(activeEditor, html);
+      }
+      onChange(normalizeEditorHtml(html));
     },
     editorProps: {
       attributes: {
-        class: 'studio-rich-text focus:outline-none px-3 py-2 text-sm leading-relaxed',
+        class: `${variantClass} focus:outline-none px-1 py-1`,
         style: `min-height: ${minHeight}px`,
+      },
+      handleKeyDown: (_view, event) => {
+        if (singleLine && event.key === 'Enter') {
+          event.preventDefault();
+          return true;
+        }
+        return false;
       },
     },
   });
@@ -105,64 +141,80 @@ export default function RichTextEditor({
   if (!editor) {
     return (
       <div
-        className="rounded-lg border border-black/20 bg-white animate-pulse"
+        className={`${bordered ? 'rounded-lg border border-black/20 bg-white' : ''} animate-pulse`}
         style={{ minHeight }}
       />
     );
   }
 
-  return (
-    <div className="rounded-lg border border-black/20 overflow-hidden bg-white">
-      <div
-        className="flex flex-wrap items-center gap-1 border-b border-black/10 bg-stone-50 px-2 py-1.5"
-        role="toolbar"
-        aria-label="Text formatting"
+  const toolbarEl = (
+    <div
+      className={`flex flex-wrap items-center gap-1 px-1 py-1 ${
+        bordered ? 'border-b border-black/10 bg-stone-50' : 'bg-black/5 rounded mb-1'
+      }`}
+      role="toolbar"
+      aria-label="Text formatting"
+    >
+      <ToolbarButton
+        title="Bold"
+        active={editor.isActive('bold')}
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className="font-bold"
       >
-        <ToolbarButton
-          title="Bold"
-          active={editor.isActive('bold')}
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className="font-bold"
-        >
-          B
-        </ToolbarButton>
-        <ToolbarButton
-          title="Italic"
-          active={editor.isActive('italic')}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className="italic"
-        >
-          I
-        </ToolbarButton>
+        B
+      </ToolbarButton>
+      <ToolbarButton
+        title="Italic"
+        active={editor.isActive('italic')}
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className="italic"
+      >
+        I
+      </ToolbarButton>
+      {showLink ? (
         <ToolbarButton title="Link" active={editor.isActive('link')} onClick={openLinkEditor}>
           Link
         </ToolbarButton>
-        <span className="w-px h-5 bg-black/15 mx-1" aria-hidden="true" />
-        <ToolbarButton
-          title="Bullet list"
-          active={editor.isActive('bulletList')}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          • List
-        </ToolbarButton>
-        <ToolbarButton
-          title="Numbered list"
-          active={editor.isActive('orderedList')}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          1. List
-        </ToolbarButton>
-        <ToolbarButton
-          title="Quote"
-          active={editor.isActive('blockquote')}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        >
-          “
-        </ToolbarButton>
-      </div>
+      ) : null}
+      {showLists ? (
+        <>
+          <span className="w-px h-5 bg-black/15 mx-1" aria-hidden="true" />
+          <ToolbarButton
+            title="Bullet list"
+            active={editor.isActive('bulletList')}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+          >
+            • List
+          </ToolbarButton>
+          <ToolbarButton
+            title="Numbered list"
+            active={editor.isActive('orderedList')}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          >
+            1. List
+          </ToolbarButton>
+          <ToolbarButton
+            title="Quote"
+            active={editor.isActive('blockquote')}
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          >
+            “
+          </ToolbarButton>
+        </>
+      ) : null}
+    </div>
+  );
+
+  return (
+    <div className={bordered ? 'rounded-lg border border-black/20 overflow-hidden bg-white' : ''}>
+      {toolbar !== 'none' ? toolbarEl : null}
 
       {showLinkInput ? (
-        <div className="flex flex-wrap items-center gap-2 border-b border-black/10 bg-stone-50 px-3 py-2">
+        <div
+          className={`flex flex-wrap items-center gap-2 px-2 py-2 ${
+            bordered ? 'border-b border-black/10 bg-stone-50' : 'bg-black/5 rounded mb-1'
+          }`}
+        >
           <input
             type="url"
             value={linkUrl}
@@ -198,7 +250,11 @@ export default function RichTextEditor({
       ) : null}
 
       <EditorContent editor={editor} />
-      {hint ? <p className="text-xs text-black/50 px-3 py-2 border-t border-black/5">{hint}</p> : null}
+      {hint ? (
+        <p className={`text-xs text-black/50 py-1 ${bordered ? 'px-3 border-t border-black/5' : ''}`}>
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }

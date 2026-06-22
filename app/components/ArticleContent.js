@@ -1,6 +1,6 @@
 import ImageWithCaption from './ImageWithCaption';
 import ImageGridWithCaptions from './ImageGridWithCaptions';
-
+import { CmsRichText } from './CmsRichText';
 function renderTextBlock(block) {
   const body = block.content?.body || '';
   const className = 'cms-rich-text text-lg leading-relaxed tracking-wide';
@@ -30,9 +30,12 @@ export default function ArticleContent({ blocks }) {
           case 'heading': {
             const Tag = block.content?.level === 3 ? 'h3' : 'h2';
             return (
-              <Tag key={block.id} className="text-2xl font-bold mt-8 mb-4">
-                {block.content?.text}
-              </Tag>
+              <CmsRichText
+                key={block.id}
+                as={Tag}
+                className="text-2xl font-bold mt-8 mb-4"
+                value={block.content?.text}
+              />
             );
           }
           case 'text':

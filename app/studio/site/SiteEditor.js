@@ -5,24 +5,20 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { defaultHomeContent, defaultArticlesIndexContent, defaultSiteMeta } from '@/lib/content/staticSite';
 import { uploadStudioImage } from '@/lib/uploads/client';
-import ImageUploadButton from '@/app/studio/components/ImageUploadButton';
-import RichTextarea from '@/app/studio/components/RichTextarea';
-import { presetHint } from '@/lib/uploads/presets';
 import StudioEditorShell from '@/app/studio/components/StudioEditorShell';
-import EditorPreviewRow from '@/app/studio/components/EditorPreviewRow';
+import WysiwygSection from '@/app/studio/components/WysiwygSection';
 import SortableList from '@/app/studio/components/SortableList';
-import ReorderControls from '@/app/studio/components/ReorderControls';
 import StudioSaveBar from '@/app/studio/components/StudioSaveBar';
 import { useUnsavedChanges } from '@/app/studio/hooks/useUnsavedChanges';
 import { useStudioAutoSave } from '@/app/studio/hooks/useStudioAutoSave';
 import {
-  SiteHeroPreview,
-  SiteAboutPreview,
-  SiteContactPreview,
-  SiteFaqPreview,
-  SiteArticlesIndexPreview,
-  SiteSeoPreview,
-} from '@/app/studio/components/SitePreviewSections';
+  SiteHeroEditable,
+  SiteAboutEditable,
+  SiteContactEditable,
+  SiteFaqEditable,
+  SiteArticlesIndexEditable,
+  SiteSeoEditable,
+} from '@/app/studio/components/SiteEditableSections';
 
 function emptyFaqItem() {
   return { question: '', answer: '', showArticlesLink: false };
@@ -124,7 +120,7 @@ export default function SiteEditor({ initialSections }) {
         ...prev,
         hero: { ...prev.hero, backgroundImage: publicUrl },
       }));
-      setMessage('Background uploaded. Click Save site content to publish.');
+      setMessage('Background uploaded. Changes auto-save after a short pause.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Image upload failed.');
     } finally {
@@ -133,27 +129,10 @@ export default function SiteEditor({ initialSections }) {
     }
   };
 
-  const updateParagraph = (index, value) => {
-    setHome((prev) => {
-      const paragraphs = [...prev.about.paragraphs];
-      paragraphs[index] = value;
-      return { ...prev, about: { ...prev.about, paragraphs } };
-    });
-  };
-
-  const updateFaqItem = (index, field, value) => {
-    setHome((prev) => {
-      const items = [...prev.faq.items];
-      items[index] = { ...items[index], [field]: value };
-      return { ...prev, faq: { ...prev.faq, items } };
-    });
-  };
-
   return (
     <>
-    <StudioEditorShell
-      header={
-        <>
+      <StudioEditorShell
+        header={
           <div>
             <Link href="/studio" className="text-sm text-black/60 hover:underline">
               ← Back to dashboard
@@ -164,303 +143,98 @@ export default function SiteEditor({ initialSections }) {
             </p>
             {isDirty ? <p className="text-sm text-amber-700 mt-2">Unsaved changes</p> : null}
           </div>
-        </>
-      }
-    >
-      <EditorPreviewRow
-        label="Hero preview"
-        preview={<SiteHeroPreview hero={home.hero} />}
-        editor={
-          <section id="hero" className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
-            <h3 className="text-xl font-semibold">Hero</h3>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.hero.name}
-              onChange={(e) => setHome((prev) => ({ ...prev, hero: { ...prev.hero, name: e.target.value } }))}
-              placeholder="Name"
-            />
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.hero.subtitle}
-              onChange={(e) =>
-                setHome((prev) => ({ ...prev, hero: { ...prev.hero, subtitle: e.target.value } }))
-              }
-              placeholder="Subtitle"
-            />
-            <textarea
-              rows={3}
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.hero.tagline}
-              onChange={(e) => setHome((prev) => ({ ...prev, hero: { ...prev.hero, tagline: e.target.value } }))}
-              placeholder="Tagline"
-            />
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Hero background image</label>
-              {home.hero.backgroundImage ? (
-                <img
-                  src={home.hero.backgroundImage}
-                  alt="Hero background"
-                  className="max-h-40 rounded border border-black/10 object-cover"
-                />
-              ) : null}
-              <ImageUploadButton
-                label={uploading ? 'Uploading...' : 'Upload background image'}
-                onChange={uploadBackground}
-                disabled={uploading}
-              />
-              <p className="text-xs text-black/50">{presetHint('hero')}</p>
-              <input
-                className="w-full border border-black/20 rounded px-3 py-2"
-                value={home.hero.backgroundImage}
-                onChange={(e) =>
-                  setHome((prev) => ({ ...prev, hero: { ...prev.hero, backgroundImage: e.target.value } }))
-                }
-                placeholder="Or paste image URL"
-              />
-            </div>
-          </section>
         }
-      />
+      >
+        <WysiwygSection label="Hero" id="hero">
+          <SiteHeroEditable
+            hero={home.hero}
+            onChange={(hero) => setHome((prev) => ({ ...prev, hero }))}
+            onUploadBackground={uploadBackground}
+            uploading={uploading}
+          />
+        </WysiwygSection>
 
-      <EditorPreviewRow
-        label="About preview"
-        preview={<SiteAboutPreview about={home.about} />}
-        editor={
-          <section id="about" className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="text-xl font-semibold">About</h3>
-              <button
-                type="button"
-                className="text-sm px-3 py-1 border rounded"
-                onClick={() =>
-                  setHome((prev) => ({
-                    ...prev,
-                    about: { paragraphs: [...prev.about.paragraphs, ''] },
-                  }))
-                }
-              >
-                Add paragraph
-              </button>
-            </div>
-            <SortableList
-              items={home.about.paragraphs}
-              onReorder={(paragraphs) =>
-                setHome((prev) => ({ ...prev, about: { ...prev.about, paragraphs } }))
-              }
-              getItemKey={(_, index) => `about-${index}`}
-              renderItem={(paragraph, index, { dragHandleProps }) => (
-                <div className="space-y-2">
-                  <RichTextarea
-                    rows={4}
-                    value={paragraph}
-                    onChange={(value) => updateParagraph(index, value)}
-                  />
-                  <ReorderControls
-                    dragHandleProps={dragHandleProps}
-                    onRemove={() =>
-                      setHome((prev) => ({
-                        ...prev,
-                        about: {
-                          paragraphs: prev.about.paragraphs.filter((_, i) => i !== index),
-                        },
-                      }))
-                    }
-                    removeLabel="Remove paragraph"
-                  />
-                </div>
-              )}
-            />
-            <p className="text-xs text-black/50">
-              Use the formatting bar for bold, italic, and links.
-            </p>
-          </section>
-        }
-      />
+        <WysiwygSection label="About" id="about">
+          <SiteAboutEditable
+            paragraphs={home.about.paragraphs}
+            onChange={(paragraphs) =>
+              setHome((prev) => ({ ...prev, about: { ...prev.about, paragraphs } }))
+            }
+            onReorder={(paragraphs) =>
+              setHome((prev) => ({ ...prev, about: { ...prev.about, paragraphs } }))
+            }
+            onRemove={(index) =>
+              setHome((prev) => ({
+                ...prev,
+                about: {
+                  paragraphs: prev.about.paragraphs.filter((_, i) => i !== index),
+                },
+              }))
+            }
+            onAdd={() =>
+              setHome((prev) => ({
+                ...prev,
+                about: { paragraphs: [...prev.about.paragraphs, ''] },
+              }))
+            }
+          />
+        </WysiwygSection>
 
-      <EditorPreviewRow
-        label="Contact preview"
-        preview={<SiteContactPreview contact={home.contact} />}
-        editor={
-          <section id="contact" className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
-            <h3 className="text-xl font-semibold">Contact</h3>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.contact.heading}
-              onChange={(e) =>
-                setHome((prev) => ({ ...prev, contact: { ...prev.contact, heading: e.target.value } }))
-              }
-              placeholder="Section heading"
-            />
-            <textarea
-              rows={2}
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.contact.intro}
-              onChange={(e) =>
-                setHome((prev) => ({ ...prev, contact: { ...prev.contact, intro: e.target.value } }))
-              }
-            />
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.contact.email}
-              onChange={(e) =>
-                setHome((prev) => ({ ...prev, contact: { ...prev.contact, email: e.target.value } }))
-              }
-              placeholder="Email"
-            />
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.contact.location}
-              onChange={(e) =>
-                setHome((prev) => ({ ...prev, contact: { ...prev.contact, location: e.target.value } }))
-              }
-              placeholder="Location"
-            />
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.contact.footerNote}
-              onChange={(e) =>
-                setHome((prev) => ({ ...prev, contact: { ...prev.contact, footerNote: e.target.value } }))
-              }
-              placeholder="Footer note"
-            />
-          </section>
-        }
-      />
+        <WysiwygSection label="Contact" id="contact">
+          <SiteContactEditable
+            contact={home.contact}
+            onChange={(contact) => setHome((prev) => ({ ...prev, contact }))}
+          />
+        </WysiwygSection>
 
-      <EditorPreviewRow
-        label="FAQ preview"
-        preview={<SiteFaqPreview faq={home.faq} />}
-        editor={
-          <section id="faq" className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="text-xl font-semibold">FAQ</h3>
-              <button
-                type="button"
-                className="text-sm px-3 py-1 border rounded"
-                onClick={() =>
-                  setHome((prev) => ({
-                    ...prev,
-                    faq: { ...prev.faq, items: [...prev.faq.items, emptyFaqItem()] },
-                  }))
-                }
-              >
-                Add question
-              </button>
-            </div>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={home.faq.title}
-              onChange={(e) =>
-                setHome((prev) => ({ ...prev, faq: { ...prev.faq, title: e.target.value } }))
-              }
-              placeholder="FAQ section title"
-            />
-            <SortableList
-              items={home.faq.items}
-              onReorder={(items) => setHome((prev) => ({ ...prev, faq: { ...prev.faq, items } }))}
-              getItemKey={(_, index) => `faq-${index}`}
-              renderItem={(item, index, { dragHandleProps }) => (
-                <div className="border border-black/10 rounded p-4 space-y-3">
-                  <input
-                    className="w-full border border-black/20 rounded px-3 py-2 font-medium"
-                    value={item.question}
-                    onChange={(e) => updateFaqItem(index, 'question', e.target.value)}
-                    placeholder="Question"
-                  />
-                  <RichTextarea
-                    rows={4}
-                    value={item.answer}
-                    onChange={(value) => updateFaqItem(index, 'answer', value)}
-                    placeholder="Answer"
-                  />
-                  <label className="inline-flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(item.showArticlesLink)}
-                      onChange={(e) => updateFaqItem(index, 'showArticlesLink', e.target.checked)}
-                    />
-                    Show link to articles section
-                  </label>
-                  <ReorderControls
-                    dragHandleProps={dragHandleProps}
-                    onRemove={() =>
-                      setHome((prev) => ({
-                        ...prev,
-                        faq: {
-                          ...prev.faq,
-                          items: prev.faq.items.filter((_, i) => i !== index),
-                        },
-                      }))
-                    }
-                  />
-                </div>
-              )}
-            />
-          </section>
-        }
-      />
+        <WysiwygSection label="FAQ" id="faq">
+          <SiteFaqEditable
+            faq={home.faq}
+            onChange={(faq) => setHome((prev) => ({ ...prev, faq }))}
+            onAddItem={() =>
+              setHome((prev) => ({
+                ...prev,
+                faq: { ...prev.faq, items: [...prev.faq.items, emptyFaqItem()] },
+              }))
+            }
+            onReorderItems={(items) => setHome((prev) => ({ ...prev, faq: { ...prev.faq, items } }))}
+            onRemoveItem={(index) =>
+              setHome((prev) => ({
+                ...prev,
+                faq: {
+                  ...prev.faq,
+                  items: prev.faq.items.filter((_, i) => i !== index),
+                },
+              }))
+            }
+          />
+        </WysiwygSection>
 
-      <EditorPreviewRow
-        label="Articles page preview"
-        preview={<SiteArticlesIndexPreview articlesIndex={articlesIndex} />}
-        editor={
-          <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
-            <h3 className="text-xl font-semibold">Articles page</h3>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={articlesIndex.title}
-              onChange={(e) => setArticlesIndex((prev) => ({ ...prev, title: e.target.value }))}
-            />
-            <textarea
-              rows={2}
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={articlesIndex.subtitle}
-              onChange={(e) => setArticlesIndex((prev) => ({ ...prev, subtitle: e.target.value }))}
-            />
-          </section>
-        }
-      />
+        <WysiwygSection label="Articles page">
+          <SiteArticlesIndexEditable articlesIndex={articlesIndex} onChange={setArticlesIndex} />
+        </WysiwygSection>
 
-      <EditorPreviewRow
-        label="SEO preview"
-        preview={<SiteSeoPreview siteMeta={siteMeta} />}
-        editor={
-          <section className="bg-white border border-black/10 rounded-lg p-6 space-y-4 h-full">
-            <h3 className="text-xl font-semibold">Site SEO</h3>
-            <input
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={siteMeta.title}
-              onChange={(e) => setSiteMeta((prev) => ({ ...prev, title: e.target.value }))}
-              placeholder="Browser tab title"
-            />
-            <textarea
-              rows={2}
-              className="w-full border border-black/20 rounded px-3 py-2"
-              value={siteMeta.description}
-              onChange={(e) => setSiteMeta((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Meta description"
-            />
-          </section>
-        }
-      />
+        <WysiwygSection label="Site SEO">
+          <SiteSeoEditable siteMeta={siteMeta} onChange={setSiteMeta} />
+        </WysiwygSection>
 
-      <p className="text-sm text-black/60">
-        Portfolio galleries are edited separately under{' '}
-        <Link href="/studio/galleries" className="underline">
-          Galleries
-        </Link>
-        . Use move up/down on the galleries list to set homepage order.
-      </p>
-    </StudioEditorShell>
-    <StudioSaveBar
-      saveLabel="Save all changes"
-      onSave={saveAll}
-      saving={saving}
-      viewHref="/"
-      viewLabel="View homepage"
-      message={message}
-      messageTone={messageTone}
-    />
+        <p className="text-sm text-black/60">
+          Portfolio galleries are edited separately under{' '}
+          <Link href="/studio/galleries" className="underline">
+            Galleries
+          </Link>
+          . Use drag-and-drop on the galleries list to set homepage order.
+        </p>
+      </StudioEditorShell>
+      <StudioSaveBar
+        saveLabel="Save all changes"
+        onSave={saveAll}
+        saving={saving}
+        viewHref="/"
+        viewLabel="View homepage"
+        message={message}
+        messageTone={messageTone}
+      />
     </>
   );
 }
